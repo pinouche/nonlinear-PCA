@@ -1,8 +1,10 @@
 import numpy as np
-from typing import Tuple, List, Union
-from src.feed_forward.layers import CrossEntropyLoss, ParamLayer, Layer
+from typing import Tuple, List
 from tqdm import tqdm
 import math
+
+from layers.layers import Layer
+from metrics.objective_function import compute_fitness
 
 # Define model
 # class NeuralNetwork(nn.Module):
@@ -17,34 +19,31 @@ import math
 
 #        assert len(self.layer_size_list) == n_layers, f"`layer_size_list` should have length {n_layers}"
 
-
 class NeuralNetwork:
 
     def __init__(self, layers: List[Layer]):
         self.layers = layers[:]
-        self.loss_layer: Union[Layer, None] = None
+        self.list_noise = []
 
-    def backward_propagation(self, output: np.ndarray) -> None:
-        grad_input = self.loss_layer.backward(np.ones_like(output))
-        for layer_index in range(len(self.layers) - 1, -1, -1):
-            grad_input = self.layers[layer_index].backward(grad_input)
+    def update(self, sigma: float, lr: float, pop_size: int, x: np.ndarray, partial_contribution_objective: bool, num_components: int) -> None:
 
-    def update_params(self, learning_rate: float) -> None:
         for layer_index in range(len(self.layers)):
-            layer = self.layers[layer_index]
-            if isinstance(layer, ParamLayer):
-                layer.apply_gradients(learning_rate)
+            w, b = self.layers[layer_index].get_weights()
+            epsilon_w, epsilon_b = np.random.randn(w.shape), np.random.randn(b.shape)
+            w += epsilon_w*sigma
+            b += epsilon_b*sigma
 
-    def evaluate_model(self, test_x: np.ndarray,
-                       test_y: np.ndarray) -> Tuple[float, float]:
-        """Returns loss and accuracy in the test set"""
-        self.loss_layer = CrossEntropyLoss(test_y)
-        y_pred = self.predict(test_x)
-        y_pred_labels = np.argmax(y_pred, axis=1)
-        y_labels = np.argmax(test_y, axis=1)
-        loss = self.loss_layer.forward(y_pred)
-        accuracy = np.sum(y_labels == y_pred_labels) / test_x.shape[0]
-        return float(np.mean(loss)), accuracy
+            self.list_noise.append((w, b))
+
+        F_obj = self.evaluate_model(x, partial_contribution_objective, num_components)
+
+    def evaluate_model(self, x: np.ndarray, partial_contribution_objective: bool, num_components: int) -> [float]:
+        """Returns objective value for given data"""
+
+        output = self.predict(x)
+        objective_value = compute_fitness(output, partial_contribution_objective, num_components)
+
+        return objective_value
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray,
             learning_rate: float, steps: int,
@@ -73,7 +72,7 @@ class NeuralNetwork:
 
         return metrics
 
-    def predict(self, x_test: np.ndarray, train: bool = False) -> np.ndarray:
+    def predict(self, x: np.ndarray, train: bool = False) -> np.ndarray:
         for layer in self.layers:
-            x_test = layer.forward(x_test, train=train)
-        return x_test
+            x = layer.forward(x, train=train)
+        return x
