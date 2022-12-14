@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 from abc import ABC, abstractmethod
 
 
@@ -16,7 +17,7 @@ class NonLinearities:
             alpha = 1.6732632423543772848170429916717
             scale = 1.0507009873554804934193349852946
             x = np.where(x > 0, x, alpha * (np.exp(x) - 1))*scale
-        elif self.activation == 'none':
+        elif self.activation == 'identity':
             x = x
         else:
             raise ValueError('Invalid activation {}'.format(self.activation))
@@ -30,6 +31,10 @@ class Layer(ABC):
     def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         pass
 
+    @abstractmethod
+    def get_weights(self) -> Tuple:
+        pass
+
 
 class ForwardLayer(Layer):
 
@@ -38,28 +43,14 @@ class ForwardLayer(Layer):
         self.weights = np.random.randn(input_dim, output_dim)
         self.biases = np.zeros((1, output_dim))
 
-        # backward params
-        self.grad_biases = np.zeros(0)
-        self.grad_weights = np.zeros(0)
+    def get_weights(self) -> Tuple:
+        return self.weights, self.biases
 
     def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         x = np.matmul(x, self.weights) + self.biases
-        x = self.activation_fn(x)
+        x = self.activation_fn.compute_output(x)
 
         return x
-
-    def perturb(self, grad_input: np.ndarray) -> np.ndarray:
-        # self.grad_weights = self.x.T @ grad_input
-        # self.grad_biases = np.sum(grad_input, axis=0, keepdims=True)
-        # return grad_input @ self.weights.T
-
-        pass
-
-    def apply_gradients(self, learning_rate: float) -> None:
-        # self.weights -= learning_rate * self.grad_weights
-        # self.biases -= learning_rate * self.grad_biases
-
-        pass
 
 
 class BatchNormLayer(Layer):
@@ -79,10 +70,6 @@ class BatchNormLayer(Layer):
         self.num_examples = 0
         self.mean_x = np.zeros(0)
         self.running_avg_gamma = 0.9
-
-        # backward params
-        self.gamma_grad = np.zeros(0)
-        self.bias_grad = np.zeros(0)
 
     def update_running_variables(self) -> None:
         is_mean_empty = np.array_equal(np.zeros(0), self.running_mean_x)
@@ -114,29 +101,7 @@ class BatchNormLayer(Layer):
         self.stddev_x = np.sqrt(self.var_x)
         self.x_minus_mean = x - self.mean_x
         self.standard_x = self.x_minus_mean / self.stddev_x
+
         return self.gamma * self.standard_x + self.bias
 
-    def backward(self, grad_input: np.ndarray) -> np.ndarray:
-        standard_grad = grad_input * self.gamma
-
-        var_grad = np.sum(standard_grad * self.x_minus_mean * -0.5 * self.var_x ** (-3/2),
-                          axis=0, keepdims=True)
-        stddev_inv = 1 / self.stddev_x
-        aux_x_minus_mean = 2 * self.x_minus_mean / self.num_examples
-
-        mean_grad = (np.sum(standard_grad * -stddev_inv, axis=0,
-                            keepdims=True) +
-                            var_grad * np.sum(-aux_x_minus_mean, axis=0,
-                            keepdims=True))
-
-        self.gamma_grad = np.sum(grad_input * self.standard_x, axis=0,
-                                 keepdims=True)
-        self.bias_grad = np.sum(grad_input, axis=0, keepdims=True)
-
-        return standard_grad * stddev_inv + var_grad * aux_x_minus_mean + \
-               mean_grad / self.num_examples
-
-    def apply_gradients(self, learning_rate: float) -> None:
-        self.gamma -= learning_rate * self.gamma_grad
-        self.bias -= learning_rate * self.bias_grad
 

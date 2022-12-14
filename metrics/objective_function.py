@@ -46,12 +46,13 @@ def get_pca(data):
 
 def compute_fitness(data_transformed, partial_contribution_objective=False, k=1):
     pca_transformed = get_pca(copy.deepcopy(data_transformed))
+    p = data_transformed.shape[1]
 
     if partial_contribution_objective:
-        p = data_transformed.shape[1]
         org_contrib = get_contribs(pca_transformed.get_covariance(), pca_transformed.components_, p, 0, p)
-        score = np.sum(org_contrib[:k, :], axis=0)
+        score = list(np.sum(org_contrib[:k, :], axis=0))
     else:
         score = np.sum(pca_transformed.explained_variance_[:k])
+        score = [score] * p
 
     return score
