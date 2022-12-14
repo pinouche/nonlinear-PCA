@@ -1,8 +1,6 @@
 import numpy as np
 from typing import List
-
 from layers.layers import Layer
-
 
 class NeuralNetwork:
 
