@@ -35,6 +35,10 @@ class Layer(ABC):
     def get_weights(self) -> Tuple:
         pass
 
+    @abstractmethod
+    def set_weights(self) -> None:
+        pass
+
 
 class ForwardLayer(Layer):
 
@@ -42,6 +46,9 @@ class ForwardLayer(Layer):
         self.activation_fn = NonLinearities(activation)
         self.weights = np.random.randn(input_dim, output_dim)
         self.biases = np.zeros((1, output_dim))
+
+    def set_weights(self, params: Tuple) -> None:
+        self.biases, self.weights = params
 
     def get_weights(self) -> Tuple:
         return self.weights, self.biases
