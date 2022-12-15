@@ -9,8 +9,8 @@ from layers.layers import Layer
 class Solution:
 
     # here, we instantiate each neural network to be the same for each transformation, but this could be easily customed.
-    def __init__(self, p: int, layers: List[Layer]):
-        self.networks = [NeuralNetwork(layers[:]) for _ in range(p)]
+    def __init__(self, network_list: List[NeuralNetwork]):
+        self.networks = network_list
 
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, partial_contribution_objective: bool, num_components: int) -> None:
 

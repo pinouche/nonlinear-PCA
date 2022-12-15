@@ -25,9 +25,8 @@ def make_alternate_stripes():
         data.append(concat)
 
     data_x = np.reshape(np.array(data), (2000, 2))
-    data_y = np.array([0] * 1000 + [1] * 1000)
 
-    return data_x, data_y
+    return data_x
 
 
 def fibonacci_sphere(r, samples=1000, mu=0, sigma=0.05):
@@ -57,9 +56,8 @@ def make_two_spheres():
     sphere_two = fibonacci_sphere(0.5)
 
     x = np.concatenate((sphere_one, sphere_two), axis=0)
-    y = [1] * sphere_one.shape[0] + [0] * sphere_two.shape[0]
 
-    return x, np.array(y)
+    return x
 
 
 def circles_data(x0=0, y0=0):
@@ -68,21 +66,21 @@ def circles_data(x0=0, y0=0):
     x[:, 0] += x0
     x[:, 1] += y0
 
-    return x, y
+    return x
 
 
 def load_data(dataset):
 
     if dataset == "spheres":
-        data_x, data_y = make_two_spheres()
+        data_x = make_two_spheres()
 
     elif dataset == "circles":
-        data_x, data_y = circles_data()
+        data_x = circles_data()
 
     elif dataset == "alternate_stripes":
-        data_x, data_y = make_alternate_stripes()
+        data_x = make_alternate_stripes()
 
     else:
         raise ValueError(f"dataset {dataset} is not valid.")
 
-    return data_x, data_y
+    return data_x
