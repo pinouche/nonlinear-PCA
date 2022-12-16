@@ -40,7 +40,7 @@ class Solution:
         self.networks = [net.update_weights(update_step) for net in self.networks]
 
     def fit(self, x_train: np.ndarray, sigma: float, learning_rate: float, pop_size: int, partial_contribution_objective: bool, num_components: int,
-            epochs: int, batch_size: int) -> Tuple:
+            epochs: int, batch_size: int, train: bool) -> Tuple:
 
         objective_list = []
         num_examples = x_train.shape[0]
@@ -57,7 +57,7 @@ class Solution:
                 print("DONE BATCH")
 
             # evaluate objective at the end of the epoch
-            x_transformed = self.predict(x_train)
+            x_transformed = self.predict(x_train, train)
             objective = self.evaluate_model(x_transformed, partial_contribution_objective, num_components)
             objective_list.append(objective)
 
@@ -65,10 +65,10 @@ class Solution:
 
         return objective_list, x_transformed
 
-    def predict(self, x: np.ndarray) -> np.ndarray:
+    def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         x_transformed = np.empty(x.shape)
         for i, network in enumerate(self.networks):
-            output_perturbed_network = network.predict(x[:, i])
+            output_perturbed_network = network.predict(x[:, i], train)
             x_transformed[:, i] = np.squeeze(output_perturbed_network)
 
         return x_transformed

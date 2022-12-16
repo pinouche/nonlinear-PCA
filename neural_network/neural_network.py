@@ -43,7 +43,7 @@ class NeuralNetwork:
 
         return self
 
-    def predict(self, x: np.ndarray, train: bool = False) -> np.ndarray:
+    def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         for layer in self.layers:
             x = layer.forward(x, train=train)
         return x
