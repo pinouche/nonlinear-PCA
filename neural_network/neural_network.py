@@ -28,9 +28,8 @@ class NeuralNetwork:
         return copy_layers
 
     def update_weights(self, update_to_add: np.ndarray):
-
+        counter = 0
         for layer in self.layers:
-            counter = 0
             if isinstance(layer, ForwardLayer):
                 layer_update = update_to_add[counter]
                 w_update, b_update = layer_update[0], layer_update[1]

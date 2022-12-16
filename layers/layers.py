@@ -31,14 +31,6 @@ class Layer(ABC):
     def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         pass
 
-    @abstractmethod
-    def get_weights(self) -> Tuple:
-        pass
-
-    @abstractmethod
-    def set_weights(self) -> None:
-        pass
-
 
 class ForwardLayer(Layer):
 
@@ -105,20 +97,13 @@ class BatchNormLayer(Layer):
             self.var_x = np.mean((x - self.mean_x) ** 2, axis=0, keepdims=True)
             self.update_running_variables()
         else:
-            print("TRUE")
             self.mean_x = self.running_mean_x.copy()
             self.var_x = self.running_var_x.copy()
 
         self.var_x += self.epsilon
         self.stddev_x = np.sqrt(self.var_x)
-        print(x.shape, self.mean_x.shape)
         self.x_minus_mean = x - self.mean_x
         self.standard_x = self.x_minus_mean / self.stddev_x
 
         return self.gamma * self.standard_x + self.bias
 
-    def get_weights(self) -> Tuple:
-        pass
-
-    def set_weights(self) -> None:
-        pass

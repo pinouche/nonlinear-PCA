@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 
-from sklearn.decomposition import PCA
+from sklearn.decomposition import SparsePCA
 from sklearn.preprocessing import scale
 
 
@@ -36,23 +36,25 @@ def get_contribs(cov, comp, k, start, end):
     return np.array(arr_contrib)
 
 
-def get_pca(data):
+def get_pca(data, alpha=0.01):
     data = scale(data, axis=0)
-    pca = PCA(n_components=data.shape[1])
+    pca = SparsePCA(n_components=data.shape[1], alpha=alpha)
     pca.fit(data)
 
     return pca
 
 
-def compute_fitness(data_transformed, partial_contribution_objective=False, k=1):
-    pca_transformed = get_pca(copy.deepcopy(data_transformed))
+def compute_fitness(data_transformed, alpha, partial_contribution_objective=False, k=1):
+    data_transformed = scale(data_transformed, axis=0)
+    pca_transformed = get_pca(copy.deepcopy(data_transformed), alpha)
     p = data_transformed.shape[1]
+    cov_matrix = np.cov(np.transpose(data_transformed))
+
+    variance_contrib = get_contribs(cov_matrix, pca_transformed.components_, p, 0, p)
 
     if partial_contribution_objective:
-        org_contrib = get_contribs(pca_transformed.get_covariance(), pca_transformed.components_, p, 0, p)
-        score = list(np.sum(org_contrib[:k, :], axis=0))
+        score = np.sum(variance_contrib[:k], axis=0)
     else:
-        score = np.sum(pca_transformed.explained_variance_[:k])
-        score = [score] * p
+        score = np.sum(variance_contrib[:k])
 
     return score
