@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from metrics.objective_function import compute_fitness
 from neural_network.neural_network import NeuralNetwork
-from layers.layers import Layer
+from layers.layers import ForwardLayer
 
 
 class Solution:
@@ -15,7 +15,7 @@ class Solution:
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, partial_contribution_objective: bool, num_components: int) -> None:
 
         # here, we assume all networks are the same topology
-        list_weights_shape = [(layer.get_weights()[0].shape, layer.get_weights()[0].shape) for layer in self.networks[0].layers]
+        list_weights_shape = [(layer.get_weights()[0].shape, layer.get_weights()[1].shape) for layer in self.networks[0].layers if isinstance(layer, ForwardLayer)]
         list_weighted_noise = []
 
         for p in range(pop_size):
@@ -24,20 +24,20 @@ class Solution:
             # at each population iteration, we add the same noise to all of the networks (no loss of generality).
             list_noise = [(np.random.randn(*w), np.random.randn(*b)) for (w, b) in list_weights_shape]
 
-            for i, network in self.networks:
+            for i, network in enumerate(self.networks):
 
                 perturbed_layers = network.perturb(list_noise, sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)
-                output_perturbed_network = perturbed_network.predict(x_batch)
-                x_transformed[:, i] = output_perturbed_network
+                output_perturbed_network = perturbed_network.predict(x_batch[:, i])
+                x_transformed[:, i] = np.squeeze(output_perturbed_network)
 
-            F_obj = self.evaluate_model(x_transformed, partial_contribution_objective, num_components)
-            weighted_noise = np.array(F_obj)*np.array(list_noise)
+            f_obj = self.evaluate_model(x_transformed, partial_contribution_objective, num_components)
+            weighted_noise = np.array(f_obj)*np.array(list_noise)
             list_weighted_noise.append(weighted_noise)
 
         gradient_estimate = np.mean(np.array(list_weighted_noise), axis=0)
         update_step = gradient_estimate*(lr/sigma)
-        self.networks = [network.update_weights(update_step)]
+        self.networks = [net.update_weights(update_step) for net in self.networks]
 
     def fit(self, x_train: np.ndarray, sigma: float, learning_rate: float, pop_size: int, partial_contribution_objective: bool, num_components: int,
             epochs: int, batch_size: int) -> Tuple:
@@ -47,12 +47,14 @@ class Solution:
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
 
         for epoch in range(epochs):
+            print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
             x_train = x_train[random_index]
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train[index_batch: index_batch + batch_size]
                 self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
+                print("DONE BATCH")
 
             # evaluate objective at the end of the epoch
             x_transformed = self.predict(x_train)
@@ -65,9 +67,9 @@ class Solution:
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         x_transformed = np.empty(x.shape)
-        for i, network in self.networks:
-            output_perturbed_network = network.predict(x)
-            x_transformed[:, i] = output_perturbed_network
+        for i, network in enumerate(self.networks):
+            output_perturbed_network = network.predict(x[:, i])
+            x_transformed[:, i] = np.squeeze(output_perturbed_network)
 
         return x_transformed
 
