@@ -8,6 +8,8 @@ from layers.layers import ForwardLayer, BatchNormLayer
 from neural_network.neural_network import NeuralNetwork
 from neural_network.evolution_strategies import Solution
 
+from utils import split_data
+
 
 def main():
 
@@ -15,16 +17,16 @@ def main():
     input_size = 1
     output_size = 1
     hidden_layer_size = 64
-    bottleneck_layer_size = 16
+    bottleneck_layer_size = 32
     activation = 'relu'
 
     # ES params
-    pop_size = 100
+    pop_size = 200
     sigma = 0.01
     learning_rate = 0.0001
     epochs = 100
     batch_size = 64
-    train = True
+    early_stopping_epochs = 20
 
     # objective function params
     alpha_reg_pca = 0.01
@@ -33,6 +35,7 @@ def main():
 
     dataset = 'circles'
     x = load_data(dataset)
+    train_x, val_x = split_data(x)
 
     # neural network
     list_layers = [[ForwardLayer(input_size, hidden_layer_size, activation),
@@ -47,8 +50,8 @@ def main():
     solution = Solution(list_neural_networks)
 
     print("Training Baseline")
-    obj_list, x_transformed = solution.fit(x, sigma, learning_rate, pop_size, alpha_reg_pca, partial_contribution_objective, num_components,
-                                           epochs, batch_size, train)
+    obj_list, x_transformed = solution.fit(train_x, val_x, sigma, learning_rate, pop_size, alpha_reg_pca, partial_contribution_objective, num_components,
+                                           epochs, batch_size, early_stopping_epochs)
 
     pickle.dump(x_transformed, open("../../Documents/x_transformed.p", "wb"))
 

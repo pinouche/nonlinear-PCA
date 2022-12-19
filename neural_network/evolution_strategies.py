@@ -39,13 +39,15 @@ class Solution:
         update_step = gradient_estimate*(lr/sigma)
         self.networks = [net.update_weights(update_step) for net in self.networks]
 
-    def fit(self, x_train: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float, partial_contribution_objective: bool, num_components: int,
-            epochs: int, batch_size: int, train: bool) -> Tuple:
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float,
+            partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int) -> Tuple:
 
         objective_list = []
         num_examples = x_train.shape[0]
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
 
+        best_objective_val = 0
+        early_stopping_iterations = 0
         for epoch in range(epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
@@ -56,14 +58,27 @@ class Solution:
                 self.update(mini_batch_x, sigma, learning_rate, pop_size, pca_reg, partial_contribution_objective, num_components)
                 print("DONE BATCH")
 
-            # evaluate objective at the end of the epoch
-            x_transformed = self.predict(x_train, train)
-            objective = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
-            objective_list.append(objective)
+            # evaluate objective at the end of the epoch on the training set
+            x_transformed_train = self.predict(x_train, True)
+            objective_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components)
 
-            print(f"the objective value for epoch {epoch} is {objective}")
+            # evaluate objective at the end of the epoch on the validation set
+            x_transformed_val = self.predict(x_val, False)
+            objective_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components)
 
-        return objective_list, x_transformed
+            objective_list.append((objective_train, objective_val))
+            print(f"the objective value for epoch {epoch} is {objective_train, objective_val}")
+
+            # implement early stopping
+            if objective_val > best_objective_val:
+                best_objective_val = objective_val
+                early_stopping_iterations = 0
+            else:
+                early_stopping_iterations += 1
+                if early_stopping_iterations >= early_stopping:
+                    break
+
+        return objective_list, (x_transformed_train, x_transformed_val)
 
     def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         x_transformed = np.empty(x.shape)
