@@ -3,7 +3,6 @@ from typing import List, Tuple
 
 from metrics.objective_function import compute_fitness
 from neural_network.neural_network import NeuralNetwork
-from layers.layers import ForwardLayer
 
 
 class Solution:
@@ -16,7 +15,7 @@ class Solution:
                num_components: int) -> None:
 
         # here, we assume all networks are the same topology
-        list_weights_shape = [(layer.get_weights()[0].shape, layer.get_weights()[1].shape) for layer in self.networks[0].layers if isinstance(layer, ForwardLayer)]
+        list_weights_shape = [(layer.get_weights()[0].shape, layer.get_weights()[1].shape) for layer in self.networks[0].layers]
         list_weighted_noise = []
 
         for p in range(pop_size):

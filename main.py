@@ -19,10 +19,10 @@ def main():
     activation = 'relu'
 
     # ES params
-    pop_size = 1000
+    pop_size = 100
     sigma = 0.01
-    learning_rate = 0.001
-    epochs = 10
+    learning_rate = 0.0001
+    epochs = 100
     batch_size = 64
     train = True
 
