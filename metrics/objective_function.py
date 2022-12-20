@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 
-from sklearn.decomposition import SparsePCA
+from sklearn.decomposition import SparsePCA, PCA
 from sklearn.preprocessing import scale
 
 
@@ -38,7 +38,7 @@ def get_contribs(cov, comp, k, start, end):
 
 def get_pca(data, alpha=0.01):
     data = scale(data, axis=0)
-    pca = SparsePCA(n_components=data.shape[1], alpha=alpha)
+    pca = PCA(n_components=data.shape[1])
     pca.fit(data)
 
     return pca
@@ -55,6 +55,6 @@ def compute_fitness(data_transformed, alpha, partial_contribution_objective=Fals
     if partial_contribution_objective:
         score = np.sum(variance_contrib[:k], axis=0)
     else:
-        score = np.sum(variance_contrib[:k])
+        score = [np.sum(variance_contrib[:k])]
 
     return score

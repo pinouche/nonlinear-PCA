@@ -32,12 +32,16 @@ class Solution:
                 x_transformed[:, i] = np.squeeze(output_perturbed_network)
 
             f_obj = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
-            weighted_noise = f_obj*np.array(list_noise)
+            weighted_noise = [f*np.array(list_noise) for f in f_obj]
             list_weighted_noise.append(weighted_noise)
 
         gradient_estimate = np.mean(np.array(list_weighted_noise), axis=0)
-        update_step = gradient_estimate*(lr/sigma)
-        self.networks = [net.update_weights(update_step) for net in self.networks]
+        update_step = [grad*(lr/sigma) for grad in gradient_estimate]
+
+        if partial_contribution_objective:
+            self.networks = [self.networks[i].update_weights(update_step[i]) for i in range(len(self.networks))]
+        else:
+            self.networks = [net.update_weights(update_step[0]) for net in self.networks]
 
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int) -> Tuple:
@@ -60,11 +64,11 @@ class Solution:
 
             # evaluate objective at the end of the epoch on the training set
             x_transformed_train = self.predict(x_train, True)
-            objective_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components)
+            objective_train = self.evaluate_model(x_transformed_train, pca_reg, False, num_components)[0]
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, False)
-            objective_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components)
+            objective_val = self.evaluate_model(x_transformed_val, pca_reg, False, num_components)[0]
 
             objective_list.append((objective_train, objective_val))
             print(f"the objective value for epoch {epoch} is {objective_train, objective_val}")

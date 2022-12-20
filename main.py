@@ -18,22 +18,22 @@ def main():
     output_size = 1
     hidden_layer_size = 64
     bottleneck_layer_size = 64
-    activation = 'leaky_relu'
+    activation = 'relu'
 
     # ES params
     pop_size = 200
     sigma = 0.01
     learning_rate = 0.0001
-    epochs = 100
+    epochs = 20
     batch_size = 64
     early_stopping_epochs = 20
 
     # objective function params
-    alpha_reg_pca = 0.01
+    alpha_reg_pca = 0
     partial_contribution_objective = False
     num_components = 1
 
-    dataset = 'circles'
+    dataset = 'spheres'
     x = load_data(dataset)
     train_x, val_x = split_data(x)
 
