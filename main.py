@@ -17,8 +17,8 @@ def main():
     input_size = 1
     output_size = 1
     hidden_layer_size = 64
-    bottleneck_layer_size = 32
-    activation = 'relu'
+    bottleneck_layer_size = 64
+    activation = 'leaky_relu'
 
     # ES params
     pop_size = 200

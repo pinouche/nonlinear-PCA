@@ -11,6 +11,8 @@ class NonLinearities:
     def compute_output(self, x: np.ndarray) -> np.ndarray:
         if self.activation == 'relu':
             x[x < 0] = 0
+        elif self.activation == 'leaky_relu':
+            x = np.where(x > 0, x, x * 0.01)
         elif self.activation == 'sigmoid':
             x = 1/(1+np.exp(x*-1))
         elif self.activation == 'selu':
@@ -38,7 +40,7 @@ class Layer(ABC):
 
 class ForwardLayer(Layer):
 
-    def __init__(self, input_dim: int, output_dim: int, activation='relu'):
+    def __init__(self, input_dim: int, output_dim: int, activation='leaky_relu'):
         self.activation_fn = NonLinearities(activation)
         self.weights = np.random.randn(input_dim, output_dim)
         self.biases = np.zeros((1, output_dim))
