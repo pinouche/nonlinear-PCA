@@ -15,7 +15,7 @@ def load_data(dataset):
         data = make_alternate_stripes()
 
     elif dataset == "abalone":
-        data = pd.read_csv("abalone.data")
+        data = pd.read_csv("datasets/abalone.data")
 
     else:
         raise ValueError(f"dataset {dataset} is not valid.")

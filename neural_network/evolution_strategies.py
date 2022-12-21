@@ -14,22 +14,20 @@ class Solution:
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, pca_reg: float, partial_contribution_objective: bool,
                num_components: int) -> None:
 
-        # here, we assume all networks are the same topology
-        list_weights_shape = [(layer.get_weights()[0].shape, layer.get_weights()[1].shape) for layer in self.networks[0].layers]
         list_weighted_noise = []
 
         for p in range(pop_size):
 
             x_transformed = np.empty((x_batch.shape[0], len(self.networks)))
-            # at each population iteration, we add the same noise to all of the networks (no loss of generality).
-            list_noise = [(np.random.randn(*tup[0]), np.random.randn(*tup[1])) for tup in list_weights_shape]
+            # get the noise
+            list_noise = [net.get_noise_network() for net in self.networks]
 
             input_index = 0
             for i, network in enumerate(self.networks):
 
                 input_dim = network.layers[0].weights.shape[0]
 
-                perturbed_layers = network.perturb(list_noise, sigma)
+                perturbed_layers = network.perturb(list_noise[i], sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)
                 output_perturbed_network = perturbed_network.predict(x_batch[:, input_index:input_index+input_dim])
                 x_transformed[:, i] = np.squeeze(output_perturbed_network)
@@ -37,7 +35,7 @@ class Solution:
                 input_index += input_dim
 
             f_obj = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
-            weighted_noise = [f*np.array(list_noise) for f in f_obj]
+            weighted_noise = [f_obj[i]*np.array(list_noise[i]) for i in range(len(f_obj))]
             list_weighted_noise.append(weighted_noise)
 
         gradient_estimate = np.mean(np.array(list_weighted_noise), axis=0)

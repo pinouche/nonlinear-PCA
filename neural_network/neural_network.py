@@ -43,3 +43,20 @@ class NeuralNetwork:
         for layer in self.layers:
             x = layer.forward(x, train=train)
         return x
+
+    def get_weights(self):
+        list_weights = []
+        for layer in self.layers:
+            w, b = layer.get_weights()
+            list_weights.append((w, b))
+
+        return list_weights
+
+    def get_noise_network(self):
+        list_weights_noise = []
+        for layer in self.layers:
+            w, b = layer.get_weights()
+            list_weights_noise.append((np.random.randn(*w.shape), np.random.randn(*b.shape)))
+
+        return list_weights_noise
+

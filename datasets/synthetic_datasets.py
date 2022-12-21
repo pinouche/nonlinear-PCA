@@ -62,7 +62,7 @@ def make_two_spheres():
 
 def circles_data(x0=0, y0=0):
     np.random.seed(0)
-    x, y = datasets.make_circles(n_samples=1000, factor=0.1, noise=0.05)
+    x, y = datasets.make_circles(n_samples=2000, factor=0.1, noise=0.05)
     x[:, 0] += x0
     x[:, 1] += y0
 

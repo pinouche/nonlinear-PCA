@@ -3,7 +3,7 @@ import pickle
 import warnings
 warnings.filterwarnings("ignore")
 
-from datasets.synthetic_datasets import load_data
+from datasets.load_data import load_data
 from layers.layers import ForwardLayer, BatchNormLayer
 from neural_network.neural_network import NeuralNetwork
 from neural_network.evolution_strategies import Solution
@@ -14,36 +14,34 @@ from utils import split_data, tranform_data_onehot
 def main():
 
     # neural network params
-    input_size = 1
     output_size = 1
     hidden_layer_size = 64
-    bottleneck_layer_size = 64
     activation = 'relu'
 
     # ES params
     pop_size = 200
     sigma = 0.01
     learning_rate = 0.0001
-    epochs = 20
+    epochs = 100
     batch_size = 64
     early_stopping_epochs = 20
 
     # objective function params
     alpha_reg_pca = 0
-    partial_contribution_objective = True
+    partial_contribution_objective = False
     num_components = 1
 
-    dataset = 'spheres'
+    dataset = 'circles'
     x = load_data(dataset)
-    x, num_features_per_network = tranform_data_onehot(x)  # transform categorical (object type) columns to one-hot encoded.
+    x, num_features_per_network = tranform_data_onehot(x)  # transform categorical (object type in pandas) columns to one-hot encoded.
     train_x, val_x = split_data(x)
 
     # neural network
     list_layers = [[ForwardLayer(n_features, hidden_layer_size, activation),
                     BatchNormLayer(hidden_layer_size),
-                    ForwardLayer(hidden_layer_size, bottleneck_layer_size, activation),
-                    BatchNormLayer(bottleneck_layer_size),
-                    ForwardLayer(bottleneck_layer_size, hidden_layer_size, activation),
+                    ForwardLayer(hidden_layer_size, hidden_layer_size, activation),
+                    BatchNormLayer(hidden_layer_size),
+                    ForwardLayer(hidden_layer_size, hidden_layer_size, activation),
                     BatchNormLayer(hidden_layer_size),
                     ForwardLayer(hidden_layer_size, output_size, 'identity')] for n_features in num_features_per_network]
 
