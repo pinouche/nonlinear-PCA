@@ -20,16 +20,21 @@ class Solution:
 
         for p in range(pop_size):
 
-            x_transformed = np.empty(x_batch.shape)
+            x_transformed = np.empty((x_batch.shape[0], len(self.networks)))
             # at each population iteration, we add the same noise to all of the networks (no loss of generality).
             list_noise = [(np.random.randn(*tup[0]), np.random.randn(*tup[1])) for tup in list_weights_shape]
 
+            input_index = 0
             for i, network in enumerate(self.networks):
+
+                input_dim = network.layers[0].weights.shape[0]
 
                 perturbed_layers = network.perturb(list_noise, sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)
-                output_perturbed_network = perturbed_network.predict(x_batch[:, i])
+                output_perturbed_network = perturbed_network.predict(x_batch[:, input_index:input_index+input_dim])
                 x_transformed[:, i] = np.squeeze(output_perturbed_network)
+
+                input_index += input_dim
 
             f_obj = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
             weighted_noise = [f*np.array(list_noise) for f in f_obj]

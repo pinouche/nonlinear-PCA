@@ -38,7 +38,12 @@ def get_contribs(cov, comp, k, start, end):
 
 def get_pca(data, alpha=0.01):
     data = scale(data, axis=0)
-    pca = PCA(n_components=data.shape[1])
+
+    if alpha > 0:
+        pca = SparsePCA(n_components=data.shape[1], alpha=alpha)
+    else:
+        pca = PCA(n_components=data.shape[1])
+
     pca.fit(data)
 
     return pca

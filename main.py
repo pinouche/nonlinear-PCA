@@ -8,7 +8,7 @@ from layers.layers import ForwardLayer, BatchNormLayer
 from neural_network.neural_network import NeuralNetwork
 from neural_network.evolution_strategies import Solution
 
-from utils import split_data
+from utils import split_data, tranform_data_onehot
 
 
 def main():
@@ -30,21 +30,22 @@ def main():
 
     # objective function params
     alpha_reg_pca = 0
-    partial_contribution_objective = False
+    partial_contribution_objective = True
     num_components = 1
 
     dataset = 'spheres'
     x = load_data(dataset)
+    x, num_features_per_network = tranform_data_onehot(x)  # transform categorical (object type) columns to one-hot encoded.
     train_x, val_x = split_data(x)
 
     # neural network
-    list_layers = [[ForwardLayer(input_size, hidden_layer_size, activation),
+    list_layers = [[ForwardLayer(n_features, hidden_layer_size, activation),
                     BatchNormLayer(hidden_layer_size),
                     ForwardLayer(hidden_layer_size, bottleneck_layer_size, activation),
                     BatchNormLayer(bottleneck_layer_size),
                     ForwardLayer(bottleneck_layer_size, hidden_layer_size, activation),
                     BatchNormLayer(hidden_layer_size),
-                    ForwardLayer(hidden_layer_size, output_size, 'identity')] for _ in range(x.shape[1])]
+                    ForwardLayer(hidden_layer_size, output_size, 'identity')] for n_features in num_features_per_network]
 
     list_neural_networks = [NeuralNetwork(l) for l in list_layers]
     solution = Solution(list_neural_networks)
