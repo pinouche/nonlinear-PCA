@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
+from layers.layers import ForwardLayer, BatchNormLayer
+
 
 def split_data(data, val_prop: float = 0.2):
 
@@ -33,4 +35,23 @@ def tranform_data_onehot(data):
     num_cols_per_categories = num_cols_per_categories + [1] * data.shape[1]
 
     return new_data, num_cols_per_categories
+
+
+def create_layers(n_features, n_layers, hidden_size, activation="leaky_relu"):
+
+    layers_list = []
+
+    if n_features > 1:
+        layers_list.append(ForwardLayer(n_features, 1, "identity"))  # for dealing with categorical variables
+    else:
+        layers_list.append(ForwardLayer(n_features, hidden_size, activation))
+        layers_list.append(BatchNormLayer(hidden_size))
+
+        for _ in range(n_layers):
+            layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
+            layers_list.append(BatchNormLayer(hidden_size))
+
+        layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
+
+    return layers_list
 
