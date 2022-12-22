@@ -60,6 +60,6 @@ def compute_fitness(data_transformed, alpha, partial_contribution_objective=Fals
     if partial_contribution_objective:
         score = np.sum(variance_contrib[:k], axis=0)
     else:
-        score = [np.sum(variance_contrib[:k])]
+        score = [np.sum(variance_contrib[:k])]*p
 
     return score

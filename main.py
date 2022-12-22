@@ -15,15 +15,15 @@ def main():
 
     # neural network params
     output_size = 1
-    hidden_layer_size = 64
-    activation = 'relu'
+    hidden_layer_size = 32
+    activation = 'leaky_relu'
 
     # ES params
-    pop_size = 200
+    pop_size = 100
     sigma = 0.01
     learning_rate = 0.0001
     epochs = 100
-    batch_size = 64
+    batch_size = 128
     early_stopping_epochs = 20
 
     # objective function params
