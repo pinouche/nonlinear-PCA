@@ -2,9 +2,10 @@ import numpy as np
 from sklearn import datasets
 import math
 
+np.random.seed(0)
+
 
 def make_alternate_stripes():
-    np.random.seed(0)
 
     data = []
 
@@ -30,7 +31,6 @@ def make_alternate_stripes():
 
 
 def fibonacci_sphere(r, samples=1000, mu=0, sigma=0.05):
-    np.random.seed(0)
     points = []
     phi = math.pi * (3. - math.sqrt(5.))  # golden angle in radians
 

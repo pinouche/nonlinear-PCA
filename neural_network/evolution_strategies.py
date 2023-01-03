@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from typing import List, Tuple
 
 from metrics.objective_function import compute_fitness
@@ -59,10 +60,10 @@ class Solution:
         for epoch in range(epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
-            x_train = x_train[random_index]
+            x_train_shuffled = copy.deepcopy(x_train[random_index])
 
             for index_batch in range(0, num_examples, batch_size):
-                mini_batch_x = x_train[index_batch: index_batch + batch_size]
+                mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
                 self.update(mini_batch_x, sigma, learning_rate, pop_size, pca_reg, partial_contribution_objective, num_components)
                 print("DONE BATCH")
 

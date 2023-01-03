@@ -1,0 +1,18 @@
+{
+    "hidden_layer_size" : 16,
+    "activation" : 'leaky_relu',
+    "n_hidden_layers" : 2,
+
+    "pop_size" : 500,
+    "sigma" : 0.01,
+    "learning_rate" : 0.0001,
+    "epochs" : 100,
+    "batch_size" : 128,
+    "early_stopping_epochs" : 5,
+
+    "alpha_reg_pca" : 0,
+    "partial_contribution_objective" : false,
+    "num_components" : 1,
+
+    "dataset": 'circles'
+}

@@ -5,15 +5,15 @@ from sklearn.preprocessing import OneHotEncoder
 from layers.layers import ForwardLayer, BatchNormLayer
 
 
-def split_data(data, val_prop: float = 0.2):
+def get_split_indices(data, val_prop: float = 0.2):
 
-    num_examples = data.shape[0]
-    random_index = np.arange(num_examples)
-    np.random.shuffle(random_index)
-    val_data = data[random_index[:int(num_examples*val_prop)]]
-    train_data = data[random_index[int(num_examples*val_prop):]]
+    n = data.shape[0]
+    indices = np.arange(n)
+    np.random.shuffle(indices)
+    train_indices = indices[int(n * val_prop):]
+    val_indices = indices[:int(n * val_prop)]
 
-    return train_data, val_data
+    return train_indices, val_indices
 
 
 def tranform_data_onehot(data):
