@@ -25,12 +25,12 @@ def compute_variance_contribution(cov, comp, k, l, d):
     return contribution
 
 
-def get_contribs(cov, comp, k, start, end):
-    arr_contrib = [[] for _ in range(k)]
+def get_contribs(cov, comp, p):
+    arr_contrib = [[] for _ in range(p)]
 
-    for pc_num in range(k):
-        for feature_num in range(start, end):
-            contrib = compute_variance_contribution(cov, comp, pc_num, feature_num, k)
+    for pc_num in range(p):
+        for feature_num in range(p):
+            contrib = compute_variance_contribution(cov, comp, pc_num, feature_num, p)
             arr_contrib[pc_num].append(contrib)
 
     return np.array(arr_contrib)
@@ -55,7 +55,7 @@ def compute_fitness(data_transformed, alpha, partial_contribution_objective=Fals
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 
-    variance_contrib = get_contribs(cov_matrix, pca_transformed.components_, p, 0, p)
+    variance_contrib = get_contribs(cov_matrix, pca_transformed.components_, p)
 
     if partial_contribution_objective:
         score = np.sum(variance_contrib[:k], axis=0)
