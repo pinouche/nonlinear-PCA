@@ -40,7 +40,7 @@ class Layer(ABC):
 
 class ForwardLayer(Layer):
 
-    def __init__(self, input_dim: int, output_dim: int, activation='leaky_relu'):
+    def __init__(self, input_dim: int, output_dim: int, activation: str = 'leaky_relu'):
         self.activation_fn = NonLinearities(activation)
         self.weights = np.random.randn(input_dim, output_dim)
         self.biases = np.zeros((1, output_dim))
@@ -56,6 +56,36 @@ class ForwardLayer(Layer):
             x = np.expand_dims(x, 1)
         x = np.matmul(x, self.weights) + self.biases
         x = self.activation_fn.compute_output(x)
+
+        return x
+
+
+# this is a monotonic layer from the paper: Monotonic Networks by Joseph Sill
+class MonotonicForwardLayer(Layer):
+
+    def __init__(self, input_dim: int, output_dim: int, monotonicity: str = 'increasing'):
+        self.weights = np.random.randn(input_dim, output_dim)
+        self.biases = np.zeros((1, output_dim))
+        self.monotonicity = monotonicity
+
+    def set_weights(self, params: Tuple) -> None:
+        self.weights, self.biases = params
+
+    def get_weights(self) -> Tuple:
+        return self.weights, self.biases
+
+    def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
+        if len(x.shape) == 1:
+            x = np.expand_dims(x, 1)
+
+        if self.monotonicity == "increasing":
+            z = np.exp(self.weights)
+        elif self.monotonicity == "decreasing":
+            z = -1*np.exp(self.weights)
+        else:
+            raise ValueError('Invalid motonicity {}'.format(self.monotonicity))
+
+        x = np.matmul(x, z) + self.biases
 
         return x
 

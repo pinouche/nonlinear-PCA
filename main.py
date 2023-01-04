@@ -2,13 +2,13 @@ import json
 import argparse
 import pickle
 import warnings
-warnings.filterwarnings("ignore")
 
 from datasets.load_data import load_data
 from neural_network.neural_network import NeuralNetwork
 from neural_network.evolution_strategies import Solution
-
 from utils import get_split_indices, tranform_data_onehot, create_layers
+
+warnings.filterwarnings("ignore")
 
 
 def main():

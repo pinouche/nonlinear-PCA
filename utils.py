@@ -37,6 +37,29 @@ def tranform_data_onehot(data):
     return new_data, num_cols_per_categories
 
 
+def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):
+
+    layers_list = list()
+
+    layers_list.append(ForwardLayer(n_features, hidden_size, activation))
+    layers_list.append(BatchNormLayer(hidden_size))
+
+    for _ in range(n_layers):
+        layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
+        layers_list.append(BatchNormLayer(hidden_size))
+
+    layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
+
+    return layers_list
+
+
+def create_nn_for_categorical_col(n_features):
+
+    layers_list = [ForwardLayer(n_features, 1, "identity")]  # simply a single linear layer
+
+    return layers_list
+
+
 def create_layers(n_features, n_layers, hidden_size, activation="leaky_relu"):
 
     layers_list = []
@@ -54,4 +77,6 @@ def create_layers(n_features, n_layers, hidden_size, activation="leaky_relu"):
         layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
 
     return layers_list
+
+
 
