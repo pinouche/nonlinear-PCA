@@ -3,7 +3,7 @@ import argparse
 import pickle
 import warnings
 
-from datasets.load_data import load_data
+from utils import load_data
 from neural_network.neural_network import NeuralNetwork
 from neural_network.evolution_strategies import Solution
 from utils import get_split_indices, tranform_data_onehot, create_layers
@@ -37,7 +37,7 @@ def main():
                                            data["partial_contribution_objective"], data["num_components"], data["epochs"], data["batch_size"],
                                            data["early_stopping_epochs"])
 
-    pickle.dump((obj_list, x_transformed), open("../Documents/x_transformed.p", "wb"))
+    pickle.dump((obj_list, x_transformed), open("results/transformed.p", "wb"))
 
 
 if __name__ == "__main__":
