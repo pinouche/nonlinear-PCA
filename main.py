@@ -22,7 +22,8 @@ def main():
 
     x = load_data(data["dataset"])
 
-    x, num_features_per_network = tranform_data_onehot(x)  # transform categorical (object type in pandas) columns to one-hot encoded.
+    # transform categorical (object type in pandas) columns to one-hot encoded.
+    x, num_features_per_network = tranform_data_onehot(x)
     train_indices, val_indices = get_split_indices(x)
     train_x, val_x = x[train_indices], x[val_indices]
 
@@ -36,7 +37,7 @@ def main():
                                            data["partial_contribution_objective"], data["num_components"], data["epochs"], data["batch_size"],
                                            data["early_stopping_epochs"])
 
-    pickle.dump((x_transformed, y), open("../../Documents/x_transformed.p", "wb"))
+    pickle.dump((obj_list, x_transformed), open("../Documents/x_transformed.p", "wb"))
 
 
 if __name__ == "__main__":

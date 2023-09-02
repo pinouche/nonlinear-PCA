@@ -8,12 +8,12 @@ from neural_network.neural_network import NeuralNetwork
 
 class Solution:
 
-    # here, we instantiate each neural network to be the same for each transformation, but this could be easily customed.
+    # here, we instantiate each neural network to be the same for each transformation (this could be easily custom).
     def __init__(self, network_list: List[NeuralNetwork]):
         self.networks = network_list
 
-    def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, pca_reg: float, partial_contribution_objective: bool,
-               num_components: int) -> None:
+    def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, pca_reg: float,
+               partial_contribution_objective: bool, num_components: int) -> None:
 
         list_weighted_noise = []
 
@@ -57,6 +57,8 @@ class Solution:
 
         best_objective_val = 0
         early_stopping_iterations = 0
+        x_transformed_train = None
+        x_transformed_val = None
         for epoch in range(epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
