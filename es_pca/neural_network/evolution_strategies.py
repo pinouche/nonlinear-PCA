@@ -2,8 +2,8 @@ import numpy as np
 import copy
 from typing import List, Tuple
 
-from metrics.objective_function import compute_fitness
-from neural_network.neural_network import NeuralNetwork
+from es_pca.metrics.objective_function import compute_fitness
+from es_pca.neural_network.neural_network import NeuralNetwork
 
 
 class Solution:

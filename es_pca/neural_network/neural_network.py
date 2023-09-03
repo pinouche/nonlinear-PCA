@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 import copy
 
-from layers.layers import Layer, ForwardLayer
+from es_pca.layers import Layer, ForwardLayer
 
 
 class NeuralNetwork:

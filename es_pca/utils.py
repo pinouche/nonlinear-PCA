@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
-from layers.layers import ForwardLayer, BatchNormLayer
+from es_pca.layers import ForwardLayer, BatchNormLayer
 
-from synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
+from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
 
 
 def load_data(dataset):
@@ -19,7 +19,7 @@ def load_data(dataset):
         data = make_alternate_stripes()
 
     elif dataset == "abalone":
-        data = pd.read_csv("datasets/abalone.data")
+        data = pd.read_csv("../datasets/abalone.data")
 
     else:
         raise ValueError(f"dataset {dataset} is not valid.")
