@@ -1,18 +1,20 @@
 import copy
 import numpy as np
 
+from typing import List, Union
+
 from sklearn.decomposition import SparsePCA, PCA
 from sklearn.preprocessing import scale
 
 
-def if_empty_zero(array):
+def if_empty_zero(array: np.array) -> np.array | int:
     if array.size == 0:
         array = 0
 
     return array
 
 
-def compute_variance_contribution(cov, comp, k, l, d):
+def compute_variance_contribution(cov: np.array, comp: np.array, k: int, l: int, d: int) -> float:
 
     first_term = comp[k, l] ** 2 * cov[l, l]
 
@@ -25,7 +27,7 @@ def compute_variance_contribution(cov, comp, k, l, d):
     return contribution
 
 
-def get_contribs(cov, comp, p):
+def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     arr_contrib = [[] for _ in range(p)]
 
     for pc_num in range(p):
@@ -36,7 +38,7 @@ def get_contribs(cov, comp, p):
     return np.array(arr_contrib)
 
 
-def get_pca(data, alpha=0.01):
+def get_pca(data: np.array, alpha: float = 0.01) -> PCA:
     data = scale(data, axis=0)
 
     if alpha > 0:
@@ -49,7 +51,8 @@ def get_pca(data, alpha=0.01):
     return pca
 
 
-def compute_fitness(data_transformed, alpha, partial_contribution_objective=False, k=1):
+def compute_fitness(data_transformed: np.array, alpha: float,
+                    partial_contribution_objective: bool = False, k: int = 1) -> Union[float, List[float]]:
     data_transformed = scale(data_transformed, axis=0)
     pca_transformed = get_pca(copy.deepcopy(data_transformed), alpha)
     p = data_transformed.shape[1]

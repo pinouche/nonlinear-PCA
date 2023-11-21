@@ -1,13 +1,15 @@
 import numpy as np
 import pandas as pd
+
+from typing import Tuple
+
 from sklearn.preprocessing import OneHotEncoder
 
-from es_pca.layers import ForwardLayer, BatchNormLayer
-
+from es_pca.layers.layers import ForwardLayer, BatchNormLayer
 from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
 
 
-def load_data(dataset):
+def load_data(dataset: str) -> pd.DataFrame | np.array:
 
     if dataset == "spheres":
         data = make_two_spheres()
@@ -27,7 +29,7 @@ def load_data(dataset):
     return data
 
 
-def get_split_indices(data, val_prop: float = 0.2):
+def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, np.array]:
 
     n = data.shape[0]
     indices = np.arange(n)
@@ -38,10 +40,9 @@ def get_split_indices(data, val_prop: float = 0.2):
     return train_indices, val_indices
 
 
-def tranform_data_onehot(data):
+def tranform_data_onehot(data: pd.DataFrame):
 
-    data = pd.DataFrame(data)  # here, we decide to work with data frames, so we convert to df
-    object_indices = np.where(data.dtypes == 'object')[0]
+    object_indices = np.where(data.dtypes == 'object')[0]  # TODO: this means that we curate the data first
     data_to_one_hot = data.iloc[:, object_indices]
 
     num_cols_per_categories = list(data_to_one_hot.nunique())
@@ -49,8 +50,8 @@ def tranform_data_onehot(data):
 
     enc = OneHotEncoder(handle_unknown='ignore')
     enc.fit(data_to_one_hot)
-
     data_to_one_hot = enc.transform(data_to_one_hot).toarray()
+
     data = data.drop(columns=cols_to_remove, inplace=False)
     new_data = np.concatenate((data_to_one_hot, data), axis=1)
 
@@ -86,8 +87,8 @@ def create_layers(n_features, n_layers, hidden_size, activation="leaky_relu"):
 
     layers_list = []
 
-    if n_features > 1:
-        layers_list.append(ForwardLayer(n_features, 1, "identity"))  # for dealing with categorical variables
+    if n_features > 1:  # for dealing with categorical variables
+        layers_list.append(ForwardLayer(n_features, 1, "identity"))
     else:
         layers_list.append(ForwardLayer(n_features, hidden_size, activation))
         layers_list.append(BatchNormLayer(hidden_size))
