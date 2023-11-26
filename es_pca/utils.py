@@ -41,23 +41,19 @@ def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, 
 
 
 def tranform_data_onehot(data: pd.DataFrame):
-
     object_indices = np.where(data.dtypes == 'object')[0]  # TODO: this means that we curate the data first
     data_to_one_hot = data.iloc[:, object_indices]
 
     num_cols_per_categories = list(data_to_one_hot.nunique())
     cols_to_remove = data_to_one_hot.columns
 
-    enc = OneHotEncoder(handle_unknown='ignore')
-    enc.fit(data_to_one_hot)
-    data_to_one_hot = enc.transform(data_to_one_hot).toarray()
+    data_to_one_hot = pd.get_dummies(data_to_one_hot)
 
     data = data.drop(columns=cols_to_remove, inplace=False)
-    new_data = np.concatenate((data_to_one_hot, data), axis=1)
+    num_cols_per_categories = [1] * data.shape[1] + num_cols_per_categories
+    data = pd.concat((data_to_one_hot, data), axis=1)
 
-    num_cols_per_categories = num_cols_per_categories + [1] * data.shape[1]
-
-    return new_data, num_cols_per_categories
+    return data, num_cols_per_categories
 
 
 def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):
