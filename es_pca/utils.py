@@ -1,12 +1,17 @@
 import numpy as np
 import pandas as pd
+from scipy.io import arff
 
 from typing import Tuple
 
-from sklearn.preprocessing import OneHotEncoder
-
 from es_pca.layers.layers import ForwardLayer, BatchNormLayer
 from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
+
+
+def read_arff(path):
+    data, meta = arff.loadarff(path)
+    data = pd.DataFrame(data)
+    return data
 
 
 def load_data(dataset: str) -> pd.DataFrame | np.array:
@@ -20,11 +25,9 @@ def load_data(dataset: str) -> pd.DataFrame | np.array:
     elif dataset == "alternate_stripes":
         data = make_alternate_stripes()
 
-    elif dataset == "abalone":
-        data = pd.read_csv("../datasets/abalone.data")
-
     else:
-        raise ValueError(f"dataset {dataset} is not valid.")
+        path = f"datasets/{dataset}.arff"
+        data = read_arff(path)
 
     return data
 
@@ -74,26 +77,17 @@ def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="l
 
 def create_nn_for_categorical_col(n_features):
 
-    layers_list = [ForwardLayer(n_features, 1, "identity")]  # simply a single linear layer
+    layer = [ForwardLayer(n_features, 1, "identity")]  # simply a single linear layer
 
-    return layers_list
+    return layer
 
 
-def create_layers(n_features, n_layers, hidden_size, activation="leaky_relu"):
-
-    layers_list = []
+def create_network(n_features, n_layers, hidden_size, activation="leaky_relu"):
 
     if n_features > 1:  # for dealing with categorical variables
-        layers_list.append(ForwardLayer(n_features, 1, "identity"))
+        layers_list = create_nn_for_categorical_col(n_features)
     else:
-        layers_list.append(ForwardLayer(n_features, hidden_size, activation))
-        layers_list.append(BatchNormLayer(hidden_size))
-
-        for _ in range(n_layers):
-            layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
-            layers_list.append(BatchNormLayer(hidden_size))
-
-        layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
+        layers_list = create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation=activation)
 
     return layers_list
 
