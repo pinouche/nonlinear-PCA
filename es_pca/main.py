@@ -10,9 +10,7 @@ from es_pca.utils import get_split_indices, tranform_data_onehot, create_network
 warnings.filterwarnings("ignore")
 
 
-def main():
-    with open("./config_es.yaml", "r") as config_data:
-        config_es = yaml.safe_load(config_data)  # data is a python dictionary
+def main(config_es: dict, dataset_config: dict) -> None:
 
     x = load_data(config_es["dataset"])
 
@@ -40,4 +38,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    with open("./config_es.yaml", "r") as config_data:
+        config_evo = yaml.safe_load(config_data)
+
+    with open("./datasets_config.yaml", "r") as config_data:
+        config_data = yaml.safe_load(config_data)
+        config_data = config_data[config_evo["dataset"]]
+
+    main(config_evo, config_data)
