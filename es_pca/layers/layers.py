@@ -90,6 +90,7 @@ class MonotonicForwardLayer(Layer):
         return x
 
 
+# TODO: Implement virtual batch normalization as in the Tim Salimans Paper
 class BatchNormLayer(Layer):
 
     def __init__(self, dims: int) -> None:

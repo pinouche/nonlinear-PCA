@@ -1,19 +1,19 @@
-- dataset: "circles"
+circles:
   num-features: 2
   synthetic-bool: true
   contains-categorical: false
-  
-- dataset: "spheres"
+
+spheres:
   num-features: 3
   synthetic-bool: true
   contains-categorical: false
-  
-- dataset: "alternate_stripes"
+
+alternate_stripes:
   num-features: 2
   synthetic-bool: true
   contains-categorical: false
-  
-- dataset: "phoneme"
+
+phoneme:
   num-features: 6
   synthetic-bool: false
   contains-categorical: true

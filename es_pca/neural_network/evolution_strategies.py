@@ -20,7 +20,7 @@ class Solution:
         for p in range(pop_size):
 
             x_transformed = np.empty((x_batch.shape[0], len(self.networks)))
-            # get the noise
+            # get the noise. This generates noise for each of the neural network
             list_noise = [net.get_noise_network() for net in self.networks]
 
             input_index = 0
@@ -37,7 +37,18 @@ class Solution:
 
             f_obj = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
-            weighted_noise = [f_obj[i]*np.array(list_noise[i]) for i in range(len(f_obj))]
+            print("HERE", type(list_noise), len(list_noise), len(f_obj), list_noise[0])
+            print([(weight[0].shape, weight[1].shape, l) for l, weight in enumerate(list_noise[0])])
+
+            weighted_noise = [
+                [
+                    tuple(f_obj[i] * arr for arr in tup)
+                    for tup in inner_list
+                ]
+                for i, inner_list in enumerate(list_noise)
+            ]
+
+            # weighted_noise = [f_obj[i]*np.array(list_noise[i]) for i in range(len(f_obj))]
             list_weighted_noise.append(weighted_noise)
 
         gradient_estimate = np.mean(np.array(list_weighted_noise), axis=0)

@@ -14,7 +14,7 @@ def read_arff(path):
     return data
 
 
-def load_data(dataset: str) -> pd.DataFrame | np.array:
+def load_data(dataset: str) -> pd.DataFrame:
 
     if dataset == "spheres":
         data = make_two_spheres()
@@ -29,7 +29,7 @@ def load_data(dataset: str) -> pd.DataFrame | np.array:
         path = f"datasets/{dataset}.arff"
         data = read_arff(path)
 
-    return data
+    return pd.DataFrame(data)
 
 
 def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, np.array]:
@@ -43,20 +43,26 @@ def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, 
     return train_indices, val_indices
 
 
-def tranform_data_onehot(data: pd.DataFrame):
+def transform_data_onehot(data: pd.DataFrame) -> Tuple[pd.DataFrame, list]:
     object_indices = np.where(data.dtypes == 'object')[0]  # TODO: this means that we curate the data first
-    data_to_one_hot = data.iloc[:, object_indices]
 
-    num_cols_per_categories = list(data_to_one_hot.nunique())
-    cols_to_remove = data_to_one_hot.columns
+    if len(object_indices) == 0:
+        return data, [1] * data.shape[1]
 
-    data_to_one_hot = pd.get_dummies(data_to_one_hot)
+    else:
 
-    data = data.drop(columns=cols_to_remove, inplace=False)
-    num_cols_per_categories = [1] * data.shape[1] + num_cols_per_categories
-    data = pd.concat((data_to_one_hot, data), axis=1)
+        data_to_one_hot = data.iloc[:, object_indices]
 
-    return data, num_cols_per_categories
+        num_cols_per_categories = list(data_to_one_hot.nunique())
+        cols_to_remove = data_to_one_hot.columns
+
+        data_to_one_hot = pd.get_dummies(data_to_one_hot)
+
+        data = data.drop(columns=cols_to_remove, inplace=False)
+        num_cols_per_categories = [1] * data.shape[1] + num_cols_per_categories
+        data = pd.concat((data_to_one_hot, data), axis=1)
+
+        return data, num_cols_per_categories
 
 
 def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):

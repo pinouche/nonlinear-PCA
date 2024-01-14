@@ -7,11 +7,11 @@ from sklearn.decomposition import SparsePCA, PCA
 from sklearn.preprocessing import scale
 
 
-def if_empty_zero(array: np.array) -> np.array | int:
+def if_empty_zero(array: np.array) -> np.array:
     if array.size == 0:
         array = 0
 
-    return array
+    return np.array(array)
 
 
 def compute_variance_contribution(cov: np.array, comp: np.array, k: int, l: int, d: int) -> float:

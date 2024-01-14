@@ -7,3 +7,4 @@ class DatasetModel(BaseModel):
     num_features: int
     synthetic_bool: bool
     contains_categorical: bool
+    
