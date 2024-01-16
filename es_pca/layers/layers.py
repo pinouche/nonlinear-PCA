@@ -145,5 +145,5 @@ class BatchNormLayer(Layer):
         return self.gamma * self.standard_x + self.bias
 
     def get_weights(self) -> Tuple:
-        return np.array([None]), np.array([None])
+        return np.array([0]), np.array([0])
 

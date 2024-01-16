@@ -43,6 +43,15 @@ def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, 
     return train_indices, val_indices
 
 
+def convert_dic_to_list(dictionary: dict) -> list:
+    result = []
+
+    for key, value in dictionary.items():
+        result.append(value)
+
+    return result
+
+
 def transform_data_onehot(data: pd.DataFrame) -> Tuple[pd.DataFrame, list]:
     object_indices = np.where(data.dtypes == 'object')[0]  # TODO: this means that we curate the data first
 

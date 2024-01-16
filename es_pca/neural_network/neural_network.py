@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 import copy
 
-from es_pca.layers.layers import Layer, ForwardLayer
+from es_pca.layers.layers import Layer, ForwardLayer, BatchNormLayer
 
 
 class NeuralNetwork:
@@ -26,7 +26,7 @@ class NeuralNetwork:
 
         return copy_layers
 
-    def update_weights(self, update_to_add: np.ndarray):
+    def update_weights(self, update_to_add: np.ndarray | list):
 
         for l in range(len(self.layers)):
             layer, layer_update = self.layers[l], update_to_add[l]
@@ -56,7 +56,10 @@ class NeuralNetwork:
         list_weights_noise = []
         for layer in self.layers:
             w, b = layer.get_weights()
-            list_weights_noise.append((np.random.randn(*w.shape), np.random.randn(*b.shape)))
+            if isinstance(layer, BatchNormLayer):  # we do not perturb the batch norm parameters.
+                list_weights_noise.append((np.array([0]), np.array([0])))
+            else:
+                list_weights_noise.append((np.random.randn(*w.shape), np.random.randn(*b.shape)))
 
         return list_weights_noise
 
