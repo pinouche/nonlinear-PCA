@@ -4,7 +4,7 @@ n_hidden_layers: 2
 pop_size: 500
 sigma: 0.01
 learning_rate: 0.0001
-epochs: 100
+epochs: 300
 batch_size: 128
 early_stopping_epochs: 20
 alpha_reg_pca: 0

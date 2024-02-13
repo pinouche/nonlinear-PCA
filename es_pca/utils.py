@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.io import arff
 
 from typing import Tuple
@@ -12,6 +13,16 @@ def read_arff(path):
     data, meta = arff.loadarff(path)
     data = pd.DataFrame(data)
     return data
+
+
+def create_scatter_plot(x_values, y_values):
+
+    plt.plot()
+    plt.scatter(x_values, y_values)
+    plt.xlabel("First component")
+    plt.ylabel("Second component")
+    plt.grid(True)
+    plt.show()
 
 
 def load_data(dataset: str) -> pd.DataFrame:

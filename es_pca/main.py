@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from utils import load_data
+from utils import load_data, create_scatter_plot
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import get_split_indices, transform_data_onehot, create_network
@@ -36,6 +36,9 @@ def main(config_es: dict, dataset_config: dict) -> None:
                                            config_es["partial_contribution_objective"], config_es["num_components"],
                                            config_es["epochs"], config_es["batch_size"],
                                            config_es["early_stopping_epochs"])
+
+    if config_es["plot"]:
+        create_scatter_plot(x_transformed[0], x_transformed[1])
 
     pickle.dump((obj_list, x_transformed), open("results/transformed.p", "wb"))
 
