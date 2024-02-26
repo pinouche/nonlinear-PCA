@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from es_pca.metrics.objective_function import compute_fitness
 from es_pca.neural_network.neural_network import NeuralNetwork
-from es_pca.utils import convert_dic_to_list
+from es_pca.utils import convert_dic_to_list, create_scatter_plot
 
 
 class Solution:
@@ -36,7 +36,7 @@ class Solution:
 
                 input_index += input_dim
 
-            f_obj = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
+            f_obj, _ = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
@@ -79,7 +79,8 @@ class Solution:
         #     self.networks = [net.update_weights(update_step[0]) for net in self.networks]
 
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float,
-            partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int) -> Tuple:
+            partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
+            verbose: bool = False) -> Tuple:
 
         objective_list = []
         num_examples = x_train.shape[0]
@@ -101,25 +102,31 @@ class Solution:
 
             # evaluate objective at the end of the epoch on the training set
             x_transformed_train = self.predict(x_train, True)
-            objective_train = self.evaluate_model(x_transformed_train, pca_reg, False, num_components)[0]
+            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, False)
-            objective_val = self.evaluate_model(x_transformed_val, pca_reg, False, num_components)[0]
+            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components)
 
             objective_list.append((objective_train, objective_val))
-            print(f"the objective value for epoch {epoch} is {objective_train, objective_val}")
+            print(f"the objective value for epoch {epoch} is: train {np.sum(objective_train)}, val {np.sum(objective_val)}")
 
             # implement early stopping
-            if objective_val > best_objective_val:
-                best_objective_val = objective_val
+            if np.sum(objective_val) > best_objective_val:
+                best_objective_val = np.sum(objective_val)
                 early_stopping_iterations = 0
             else:
                 early_stopping_iterations += 1
                 if early_stopping_iterations >= early_stopping:
                     break
 
-        return objective_list, (x_transformed_train, x_transformed_val)
+            if verbose and epoch % 10 == 0:
+                self.plot(x_transformed_train, pca_transformed_train)
+
+        return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train)
+
+    def plot(self, x_transformed, pca_transformed):
+        create_scatter_plot(x_transformed, pca_transformed)
 
     def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
         x_transformed = np.empty(x.shape)
@@ -131,7 +138,7 @@ class Solution:
 
     def evaluate_model(self, x_transformed: np.ndarray, pca_reg: float, partial_contribution_objective: bool, num_components: int) -> [float]:
 
-        objective_value = compute_fitness(x_transformed, pca_reg, partial_contribution_objective, num_components)
+        objective_value, pca_transformed = compute_fitness(x_transformed, pca_reg, partial_contribution_objective, num_components)
 
-        return objective_value
+        return objective_value, pca_transformed
 

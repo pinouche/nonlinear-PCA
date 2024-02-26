@@ -3,11 +3,14 @@ activation: "leaky_relu"
 n_hidden_layers: 2
 pop_size: 500
 sigma: 0.01
-learning_rate: 0.0001
-epochs: 300
+learning_rate: 0.0005
+epochs: 400
 batch_size: 128
-early_stopping_epochs: 20
-alpha_reg_pca: 0
-partial_contribution_objective: false
+early_stopping_epochs: 300
+alpha_reg_pca: 0.0
+partial_contribution_objective: true
 num_components: 1
-dataset: "circles"
+dataset: "spheres"
+plot: false
+
+# 1,31

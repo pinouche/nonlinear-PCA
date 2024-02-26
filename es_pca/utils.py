@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 from scipy.io import arff
 
 from typing import Tuple
@@ -15,13 +16,20 @@ def read_arff(path):
     return data
 
 
-def create_scatter_plot(x_values, y_values):
+def create_scatter_plot(data_transformed, data_pca_transformed):
+    fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
-    plt.plot()
-    plt.scatter(x_values, y_values)
-    plt.xlabel("First component")
-    plt.ylabel("Second component")
-    plt.grid(True)
+    for i, data in enumerate([data_transformed, data_pca_transformed]):
+        ax = axes[i]
+        ax.grid(True)
+        ax.scatter(data[:, 0], data[:, 1], c="blue", s=20, edgecolor="k")
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+        ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+        ax.tick_params(axis='both', which='major', labelsize=14)
+        ax.set_xlabel(r"$\widetilde{z}_1$", size=15)
+        ax.set_ylabel(r"$\widetilde{z}_2$", size=15)
+
+    plt.tight_layout()  # Adjust layout to prevent overlapping
     plt.show()
 
 

@@ -35,10 +35,7 @@ def main(config_es: dict, dataset_config: dict) -> None:
                                            config_es["pop_size"], config_es["alpha_reg_pca"],
                                            config_es["partial_contribution_objective"], config_es["num_components"],
                                            config_es["epochs"], config_es["batch_size"],
-                                           config_es["early_stopping_epochs"])
-
-    if config_es["plot"]:
-        create_scatter_plot(x_transformed[0], x_transformed[1])
+                                           config_es["early_stopping_epochs"], config_es["plot"])
 
     pickle.dump((obj_list, x_transformed), open("results/transformed.p", "wb"))
 
