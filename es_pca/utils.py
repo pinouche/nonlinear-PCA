@@ -51,8 +51,8 @@ def load_data(dataset: str) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def get_split_indices(data: np.array, val_prop: float = 0.2) -> Tuple[np.array, np.array]:
-
+def get_split_indices(data: np.array, random_seed: int, val_prop: float = 0.2) -> Tuple[np.array, np.array]:
+    np.random.seed(random_seed)
     n = data.shape[0]
     indices = np.arange(n)
     np.random.shuffle(indices)

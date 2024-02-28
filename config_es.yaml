@@ -8,9 +8,10 @@ epochs: 400
 batch_size: 128
 early_stopping_epochs: 300
 alpha_reg_pca: 0.0
-partial_contribution_objective: true
+partial_contribution_objective: false
 num_components: 1
 dataset: "spheres"
+number_of_runs: 30
 plot: false
 
 # 1,31

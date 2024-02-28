@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from utils import load_data, create_scatter_plot
+from utils import load_data
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import get_split_indices, transform_data_onehot, create_network
@@ -12,14 +12,14 @@ from es_pca.utils import get_split_indices, transform_data_onehot, create_networ
 warnings.filterwarnings("ignore")
 
 
-def main(config_es: dict, dataset_config: dict) -> None:
+def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
     x = load_data(config_es["dataset"])
     print(type(x), x.shape)
 
     # transform categorical (object type in pandas) columns to one-hot encoded.
     x, num_features_per_network = transform_data_onehot(x)
-    train_indices, val_indices = get_split_indices(x)
+    train_indices, val_indices = get_split_indices(x, run_index)
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
 
     # Instantiate Solution object
@@ -37,7 +37,7 @@ def main(config_es: dict, dataset_config: dict) -> None:
                                            config_es["epochs"], config_es["batch_size"],
                                            config_es["early_stopping_epochs"], config_es["plot"])
 
-    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/transformed.p", "wb"))
+    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/{config_es['partial_contribution_objective']}/{run_index}.p", "wb"))
 
 
 if __name__ == "__main__":
@@ -49,4 +49,7 @@ if __name__ == "__main__":
         config_data = yaml.safe_load(config_data)
         config_data = config_data[config_evo["dataset"]]
 
-    main(config_evo, config_data)
+    number_of_runs = config_evo["number_of_runs"]
+
+    for i in range(number_of_runs):
+        main(config_evo, config_data, i)
