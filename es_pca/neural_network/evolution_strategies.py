@@ -27,7 +27,7 @@ class Solution:
             input_index = 0
             for i, network in enumerate(self.networks):
 
-                input_dim = network.layers[0].weights.shape[0]
+                input_dim = network.layers[0].weights.shape[0]  # we can ignore this "unresolved attribute"
 
                 perturbed_layers = network.perturb(list_noise[i], sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)
