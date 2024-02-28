@@ -37,7 +37,7 @@ def main(config_es: dict, dataset_config: dict) -> None:
                                            config_es["epochs"], config_es["batch_size"],
                                            config_es["early_stopping_epochs"], config_es["plot"])
 
-    pickle.dump((obj_list, x_transformed), open("results/transformed.p", "wb"))
+    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/transformed.p", "wb"))
 
 
 if __name__ == "__main__":

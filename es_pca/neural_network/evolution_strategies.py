@@ -108,12 +108,21 @@ class Solution:
             x_transformed_val = self.predict(x_val, False)
             objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components)
 
+            # for partial contribution = True, each element is the explained variance for each variable.
+            # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
+            if partial_contribution_objective:
+                objective_train = np.sum(objective_train)
+                objective_val = np.sum(objective_val)
+            else:
+                objective_train = objective_train[0]
+                objective_val = objective_val[0]
+
             objective_list.append((objective_train, objective_val))
-            print(f"the objective value for epoch {epoch} is: train {np.sum(objective_train)}, val {np.sum(objective_val)}")
+            print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
             # implement early stopping
-            if np.sum(objective_val) > best_objective_val:
-                best_objective_val = np.sum(objective_val)
+            if objective_val > best_objective_val:
+                best_objective_val = objective_val
                 early_stopping_iterations = 0
             else:
                 early_stopping_iterations += 1
