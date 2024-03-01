@@ -81,7 +81,7 @@ class Solution:
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
             verbose: bool = False) -> Tuple:
-
+# bobina code
         objective_list = []
         num_examples = x_train.shape[0]
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
@@ -100,7 +100,7 @@ class Solution:
                 self.update(mini_batch_x, sigma, learning_rate, pop_size, pca_reg, partial_contribution_objective, num_components)
                 # print("DONE BATCH")
 
-            # evaluate objective at the end of the epoch on the training set
+            # evaluate objective at the end of the epoch on the training set i love bobain
             x_transformed_train = self.predict(x_train, True)
             objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components)
 

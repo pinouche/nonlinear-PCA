@@ -37,7 +37,7 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
                                            config_es["epochs"], config_es["batch_size"],
                                            config_es["early_stopping_epochs"], config_es["plot"])
 
-    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/{config_es['partial_contribution_objective']}/{run_index}.p", "wb"))
+    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/{str(config_es['partial_contribution_objective'])}/{str(run_index)}.p", "wb"))
 
 
 if __name__ == "__main__":
