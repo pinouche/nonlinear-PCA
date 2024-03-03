@@ -1,0 +1,19 @@
+circles:
+  num-features: 2
+  synthetic-bool: true
+  contains-categorical: false
+
+spheres:
+  num-features: 3
+  synthetic-bool: true
+  contains-categorical: false
+
+alternate_stripes:
+  num-features: 2
+  synthetic-bool: true
+  contains-categorical: false
+
+phoneme:
+  num-features: 6
+  synthetic-bool: false
+  contains-categorical: true

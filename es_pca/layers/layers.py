@@ -34,7 +34,7 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def get_weights(self) -> Tuple:
+    def get_layer_weights(self) -> Tuple:
         pass
 
 
@@ -48,7 +48,7 @@ class ForwardLayer(Layer):
     def set_weights(self, params: Tuple) -> None:
         self.weights, self.biases = params
 
-    def get_weights(self) -> Tuple:
+    def get_layer_weights(self) -> Tuple:
         return self.weights, self.biases
 
     def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
@@ -71,7 +71,7 @@ class MonotonicForwardLayer(Layer):
     def set_weights(self, params: Tuple) -> None:
         self.weights, self.biases = params
 
-    def get_weights(self) -> Tuple:
+    def get_layer_weights(self) -> Tuple:
         return self.weights, self.biases
 
     def forward(self, x: np.ndarray, train: bool = True) -> np.ndarray:
@@ -90,6 +90,7 @@ class MonotonicForwardLayer(Layer):
         return x
 
 
+# TODO: Implement virtual batch normalization as in the Tim Salimans Paper
 class BatchNormLayer(Layer):
 
     def __init__(self, dims: int) -> None:
@@ -143,6 +144,6 @@ class BatchNormLayer(Layer):
 
         return self.gamma * self.standard_x + self.bias
 
-    def get_weights(self) -> Tuple:
-        return np.array([None]), np.array([None])
+    def get_layer_weights(self) -> Tuple:
+        return np.array([0]), np.array([0])
 
