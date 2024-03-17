@@ -48,12 +48,12 @@ def get_pca(data: np.array, alpha: float = 0.01) -> tuple[PCA, np.array]:
     data = scale(data, axis=0)
 
     if pca_type == "sparse":
-        pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG["sparse_pca_alpha"])
+        pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG["alpha_reg_pca"])
     elif pca_type == "regular":
         pca = PCA(n_components=data.shape[1])
     elif pca_type == "robust":
         pca = Rpca(data)
-        L, S = pca.fit(max_iter=10000, iter_print=100)
+        L, S = pca.fit(max_iter=1000, iter_print=100)
         data = L
         pca = PCA(n_components=data.shape[1])
     else:
