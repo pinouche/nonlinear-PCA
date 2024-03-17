@@ -8,6 +8,7 @@ epochs: 300
 batch_size: 128
 early_stopping_epochs: 300
 alpha_reg_pca: 0.0
+pca_type: "robust"
 partial_contribution_objective: true
 num_components: 1
 dataset: "circles"

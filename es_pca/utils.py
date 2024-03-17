@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from scipy.io import arff
+import os
+import yaml
 
 from typing import Tuple
 
@@ -124,6 +126,13 @@ def create_network(n_features, n_layers, hidden_size, activation="leaky_relu"):
         layers_list = create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation=activation)
 
     return layers_list
+
+
+def config_load() -> dict:
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(root_dir, "../config_es.yaml")
+    with open(config_path) as f:
+        return yaml.safe_load(f)
 
 
 
