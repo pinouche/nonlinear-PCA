@@ -72,7 +72,7 @@ def compute_fitness(data_transformed: np.array,
                     k: int = 1) -> Union[list, Any]:
 
     data_transformed = scale(data_transformed, axis=0)
-    if CONFIG["remove_outliers"]:
+    if CONFIG["remove_outliers"] and evalutation_mode:
         data_transformed = remove_outliers(data_transformed)
     pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed), alpha)
     p = data_transformed.shape[1]
