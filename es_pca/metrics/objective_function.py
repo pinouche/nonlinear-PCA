@@ -65,8 +65,12 @@ def get_pca(data: np.array, alpha: float = 0.01) -> tuple[PCA, np.array]:
     return pca, pca_transformed_data
 
 
-def compute_fitness(data_transformed: np.array, alpha: float,
-                    partial_contribution_objective: bool = False, k: int = 1) -> Union[list, Any]:
+def compute_fitness(data_transformed: np.array,
+                    evalutation_mode: bool,
+                    alpha: float = 0.0,
+                    partial_contribution_objective: bool = False,
+                    k: int = 1) -> Union[list, Any]:
+
     data_transformed = scale(data_transformed, axis=0)
     if CONFIG["remove_outliers"]:
         data_transformed = remove_outliers(data_transformed)
