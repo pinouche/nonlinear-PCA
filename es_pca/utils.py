@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+from sklearn.neighbors import LocalOutlierFactor
 from scipy.io import arff
 import os
 import yaml
@@ -135,4 +136,9 @@ def config_load() -> dict:
         return yaml.safe_load(f)
 
 
-
+def remove_outliers(data: np.array):
+    clf = LocalOutlierFactor(n_neighbors=5)
+    mask = clf.fit_predict(data)
+    mask[mask == -1] = 0
+    data = data[mask.astype(bool)]
+    return data

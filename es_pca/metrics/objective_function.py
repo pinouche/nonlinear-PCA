@@ -6,7 +6,7 @@ from typing import Union, Any
 from sklearn.decomposition import SparsePCA, PCA
 from sklearn.preprocessing import scale
 
-from es_pca.utils import config_load
+from es_pca.utils import config_load, remove_outliers
 
 
 CONFIG = config_load()
@@ -68,6 +68,8 @@ def get_pca(data: np.array, alpha: float = 0.01) -> tuple[PCA, np.array]:
 def compute_fitness(data_transformed: np.array, alpha: float,
                     partial_contribution_objective: bool = False, k: int = 1) -> Union[list, Any]:
     data_transformed = scale(data_transformed, axis=0)
+    if CONFIG["remove_outliers"]:
+        data_transformed = remove_outliers(data_transformed)
     pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed), alpha)
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
@@ -85,6 +87,8 @@ def compute_fitness(data_transformed: np.array, alpha: float,
 
 
 class Rpca:
+
+    """Implementation taken from https://github.com/dganguli/robust-pca"""
 
     def __init__(self, D, mu=None, lmbda=None):
         self.L = None
