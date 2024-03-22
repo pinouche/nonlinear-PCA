@@ -29,8 +29,15 @@ def create_scatter_plot(data_transformed, data_pca_transformed):
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)
-        ax.set_xlabel(r"$\widetilde{z}_1$", size=15)
-        ax.set_ylabel(r"$\widetilde{z}_2$", size=15)
+
+        x_label = r"$\widetilde{x}_1$"
+        y_label = r"$\widetilde{x}_2$"
+        if i == 1:
+            x_label = r"$\widetilde{z}_1$"
+            y_label = r"$\widetilde{z}_2$"
+
+        ax.set_xlabel(x_label, size=15)
+        ax.set_ylabel(y_label, size=15)
 
     plt.tight_layout()  # Adjust layout to prevent overlapping
     plt.show()
