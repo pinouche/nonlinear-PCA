@@ -145,7 +145,7 @@ class Solution:
                        pca_reg: float,
                        partial_contribution_objective: bool,
                        num_components: int,
-                       training_mode: bool) -> [float]:
+                       training_mode: bool) -> tuple[float, np.array]:
 
         objective_value, pca_transformed = compute_fitness(x_transformed,
                                                            training_mode,

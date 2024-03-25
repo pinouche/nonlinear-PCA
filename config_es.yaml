@@ -15,7 +15,7 @@ dataset: "circles"
 number_of_runs: 30
 remove_outliers: true
 plot: true
-val_prop: 0.2
+val_prop: 0.5
 
 
 
