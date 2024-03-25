@@ -36,7 +36,7 @@ class Solution:
 
                 input_index += input_dim
 
-            f_obj, _ = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components, False)
+            f_obj, _ = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components, True)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
@@ -97,11 +97,11 @@ class Solution:
 
             # evaluate objective at the end of the epoch on the training set
             x_transformed_train = self.predict(x_train, True)
-            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components, False)
+            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components, True)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, False)
-            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components, True)
+            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components, False)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
@@ -145,10 +145,10 @@ class Solution:
                        pca_reg: float,
                        partial_contribution_objective: bool,
                        num_components: int,
-                       evaluation_mode: bool) -> [float]:
+                       training_mode: bool) -> [float]:
 
         objective_value, pca_transformed = compute_fitness(x_transformed,
-                                                           evaluation_mode,
+                                                           training_mode,
                                                            pca_reg,
                                                            partial_contribution_objective,
                                                            num_components)
