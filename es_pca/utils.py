@@ -19,13 +19,14 @@ def read_arff(path):
     return data
 
 
-def create_scatter_plot(data_transformed, data_pca_transformed):
+def create_scatter_plot(data_transformed: tuple[np.array, np.array], data_pca_transformed: tuple[np.array, np.array]):
     fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
     for i, data in enumerate([data_transformed, data_pca_transformed]):
         ax = axes[i]
         ax.grid(True)
-        ax.scatter(data[:, 0], data[:, 1], c="blue", s=20, edgecolor="k")
+        ax.scatter(data[0][:, 0], data[0][:, 1], c="blue", s=20, edgecolor="k", alpha=0.5, label="Training data")
+        ax.scatter(data[1][:, 0], data[1][:, 1], c="red", s=20, edgecolor="k", label="Validation data")
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)
@@ -146,7 +147,7 @@ def config_load() -> dict:
 
 
 def remove_outliers(data: np.array):
-    clf = LocalOutlierFactor(n_neighbors=5)
+    clf = LocalOutlierFactor(n_neighbors=20)
     mask = clf.fit_predict(data)
     mask[mask == -1] = 0
     data = data[mask.astype(bool)]

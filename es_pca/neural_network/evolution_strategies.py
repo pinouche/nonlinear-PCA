@@ -13,7 +13,7 @@ class Solution:
     def __init__(self, network_list: List[NeuralNetwork]):
         self.networks = network_list
 
-    def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int, pca_reg: float,
+    def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int,
                partial_contribution_objective: bool, num_components: int) -> None:
 
         dict_weighted_noise = {}
@@ -36,7 +36,7 @@ class Solution:
 
                 input_index += input_dim
 
-            f_obj, _ = self.evaluate_model(x_transformed, pca_reg, partial_contribution_objective, num_components, True)
+            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
@@ -73,7 +73,7 @@ class Solution:
         self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
                          for i in range(len(self.networks))]
 
-    def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int, pca_reg: float,
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
             verbose: bool = False) -> Tuple:
 
@@ -83,8 +83,9 @@ class Solution:
 
         best_objective_val = 0
         early_stopping_iterations = 0
-        x_transformed_train = None
-        x_transformed_val = None
+        x_transformed_train, x_transformed_val = None, None
+        pca_transformed_val, pca_transformed_train = None, None
+
         for epoch in range(epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
@@ -92,16 +93,16 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                self.update(mini_batch_x, sigma, learning_rate, pop_size, pca_reg, partial_contribution_objective, num_components)
+                self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
                 # print("DONE BATCH")
 
             # evaluate objective at the end of the epoch on the training set
             x_transformed_train = self.predict(x_train, True)
-            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, pca_reg, partial_contribution_objective, num_components, True)
+            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, partial_contribution_objective, num_components, True)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, False)
-            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, pca_reg, partial_contribution_objective, num_components, False)
+            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, partial_contribution_objective, num_components, False)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
@@ -125,11 +126,12 @@ class Solution:
                     break
 
             if verbose and epoch % 10 == 0:
-                self.plot(x_transformed_train, pca_transformed_train)
+                self.plot((x_transformed_train, x_transformed_val),
+                          (pca_transformed_train, pca_transformed_val))
 
-        return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train)
+        return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
 
-    def plot(self, x_transformed, pca_transformed):
+    def plot(self, x_transformed: tuple[np.array, np.array], pca_transformed: tuple[np.array, np.array]) -> None:
         create_scatter_plot(x_transformed, pca_transformed)
 
     def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
@@ -142,14 +144,12 @@ class Solution:
 
     def evaluate_model(self,
                        x_transformed: np.ndarray,
-                       pca_reg: float,
                        partial_contribution_objective: bool,
                        num_components: int,
-                       training_mode: bool) -> tuple[float, np.array]:
+                       training_mode: bool) -> tuple[list[float], np.array]:
 
         objective_value, pca_transformed = compute_fitness(x_transformed,
                                                            training_mode,
-                                                           pca_reg,
                                                            partial_contribution_objective,
                                                            num_components)
 

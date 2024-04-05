@@ -43,7 +43,7 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     return np.array(arr_contrib)
 
 
-def get_pca(data: np.array, alpha: float = 0.01) -> tuple[PCA, np.array]:
+def get_pca(data: np.array) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
     data = scale(data, axis=0)
 
@@ -62,7 +62,6 @@ def get_pca(data: np.array, alpha: float = 0.01) -> tuple[PCA, np.array]:
 
 def compute_fitness(data_transformed: np.array,
                     training_mode: bool = True,
-                    alpha: float = 0.0,
                     partial_contribution_objective: bool = False,
                     k: int = 1) -> Union[list, Any]:
 
@@ -70,7 +69,7 @@ def compute_fitness(data_transformed: np.array,
         data_transformed = remove_outliers(data_transformed)
     data_transformed = scale(data_transformed, axis=0)
 
-    pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed), alpha)
+    pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed))
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 

@@ -31,11 +31,16 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
     solution = Solution(list_neural_networks)
 
     print("Training Baseline...")
-    obj_list, x_transformed = solution.fit(train_x, val_x, config_es["sigma"], config_es["learning_rate"],
-                                           config_es["pop_size"], config_es["alpha_reg_pca"],
-                                           config_es["partial_contribution_objective"], config_es["num_components"],
-                                           config_es["epochs"], config_es["batch_size"],
-                                           config_es["early_stopping_epochs"], config_es["plot"])
+    obj_list, x_transformed = solution.fit(train_x, val_x,
+                                           config_es["sigma"],
+                                           config_es["learning_rate"],
+                                           config_es["pop_size"],
+                                           config_es["partial_contribution_objective"],
+                                           config_es["num_components"],
+                                           config_es["epochs"],
+                                           config_es["batch_size"],
+                                           config_es["early_stopping_epochs"],
+                                           config_es["plot"])
 
     pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/{str(config_es['partial_contribution_objective'])}/{str(run_index)}.p", "wb"))
 

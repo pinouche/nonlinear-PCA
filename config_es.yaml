@@ -1,6 +1,6 @@
-hidden_layer_size: 64
+hidden_layer_size: 128
 activation: "selu"
-n_hidden_layers: 1
+n_hidden_layers: 2
 pop_size: 500
 sigma: 0.01
 learning_rate: 0.0005
@@ -14,7 +14,7 @@ num_components: 1
 dataset: "circles"
 number_of_runs: 30
 remove_outliers: true
-plot: true
+plot: false
 val_prop: 0.5
 
 
