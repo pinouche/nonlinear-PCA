@@ -1,6 +1,7 @@
 import yaml
 import pickle
 import warnings
+import os
 
 import numpy as np
 
@@ -42,7 +43,12 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
                                            config_es["early_stopping_epochs"],
                                            config_es["plot"])
 
-    pickle.dump((obj_list, x_transformed), open(f"results/{config_es['dataset']}/{str(config_es['partial_contribution_objective'])}/{str(run_index)}.p", "wb"))
+    saving_path = f"results/{config_es['dataset']}/{str(config_es['partial_contribution_objective'])}/{str(run_index)}.p"
+
+    if not os.path.exists(os.path.dirname(saving_path)):
+        os.makedirs(os.path.dirname(saving_path))
+
+    pickle.dump((obj_list, x_transformed), open(saving_path, "wb"))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-hidden_layer_size: 128
-activation: "selu"
-n_hidden_layers: 2
+hidden_layer_size: 64
+activation: "leaky_relu"
+n_hidden_layers: 1
 pop_size: 500
 sigma: 0.01
 learning_rate: 0.0005
@@ -9,11 +9,12 @@ batch_size: 128
 early_stopping_epochs: 300
 alpha_reg_pca: 0.0
 pca_type: "regular"
-partial_contribution_objective: true
+partial_contribution_objective: false
 num_components: 1
 dataset: "circles"
 number_of_runs: 30
 remove_outliers: true
+n_outliers: 20
 plot: false
 val_prop: 0.5
 
