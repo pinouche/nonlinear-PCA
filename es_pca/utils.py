@@ -113,7 +113,7 @@ def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="l
     layers_list.append(ForwardLayer(n_features, hidden_size, activation))
     layers_list.append(BatchNormLayer(hidden_size))
 
-    for _ in range(n_layers-1):
+    for _ in range(n_layers):
         layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
         layers_list.append(BatchNormLayer(hidden_size))
 
@@ -147,8 +147,7 @@ def config_load() -> dict:
 
 
 def remove_outliers(data: np.array):
-    config = config_load()
-    clf = LocalOutlierFactor(n_neighbors=config["n_outliers"])
+    clf = LocalOutlierFactor(n_neighbors=20)
     mask = clf.fit_predict(data)
     mask[mask == -1] = 0
     data = data[mask.astype(bool)]

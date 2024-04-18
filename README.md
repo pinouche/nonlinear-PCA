@@ -3,8 +3,8 @@ Non-linear PCA by training neural networks using Evolution Strategies (ES). The 
 This script is run using:
 
 ```
-python3 main.py --filename config.json5
+python3 src/main.py 
 ```
 
-where the ```config.json5``` contains all the parameters to fully specify a ES run (ES parameters, neural networks parameters).
+where the ```config_es.yaml``` contains all the parameters to fully specify a ES run (ES parameters, neural networks parameters).
 
