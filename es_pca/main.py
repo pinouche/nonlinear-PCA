@@ -2,21 +2,23 @@ import yaml
 import pickle
 import warnings
 import os
+from loguru import logger
 
 import numpy as np
 
 from utils import load_data
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import get_split_indices, transform_data_onehot, create_network
+from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments
 
 warnings.filterwarnings("ignore")
 
 
 def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
-    x = load_data(config_es["dataset"])
-    print(type(x), x.shape)
+    args = parse_arguments()
+
+    x = load_data(args.dataset)
 
     # transform categorical (object type in pandas) columns to one-hot encoded.
     x, num_features_per_network = transform_data_onehot(x)
@@ -27,23 +29,26 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
     list_neural_networks = [NeuralNetwork(create_network(n_features,
                                                          config_es["n_hidden_layers"],
                                                          config_es["hidden_layer_size"],
-                                                         config_es["activation"])) for n_features in
+                                                         args.activation)) for n_features in
                             num_features_per_network]
     solution = Solution(list_neural_networks)
 
-    print("Training Baseline...")
+    logger.info(f"Training Baseline for dataset={args.dataset}, "
+                f"partial_contrib={args.partial_contrib},"
+                f"activation_function={args.activation}")
+
     obj_list, x_transformed = solution.fit(train_x, val_x,
                                            config_es["sigma"],
                                            config_es["learning_rate"],
                                            config_es["pop_size"],
-                                           config_es["partial_contribution_objective"],
+                                           args.partial_contrib,
                                            config_es["num_components"],
                                            config_es["epochs"],
                                            config_es["batch_size"],
                                            config_es["early_stopping_epochs"],
                                            config_es["plot"])
 
-    saving_path = f"results/{config_es['dataset']}/partial_contrib={str(config_es['partial_contribution_objective'])}/{str(run_index)}.p"
+    saving_path = f"results/{args.dataset}/activation={args.activation}/partial_contrib={str(args.partial_contrib)}/{str(run_index)}.p"
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))

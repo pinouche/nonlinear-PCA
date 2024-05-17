@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import argparse
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from sklearn.neighbors import LocalOutlierFactor
@@ -144,6 +145,36 @@ def config_load() -> dict:
     config_path = os.path.join(root_dir, "../config_es.yaml")
     with open(config_path) as f:
         return yaml.safe_load(f)
+
+
+def parse_arguments():
+
+    config = config_load()
+
+    parser = argparse.ArgumentParser(description="test", conflict_handler="resolve")
+    parser.add_argument(
+        "--dataset",
+        default=config["dataset"],
+        help="Specify the dataset.",
+    )
+
+    parser.add_argument(
+        "--partial_contrib",
+        type=bool,
+        default=config["partial_contribution_objective"],
+        help="Specify whether or not to use partial contribution objective."
+    )
+
+    parser.add_argument(
+        "--activation",
+        type=str,
+        default=config["activation"],
+        help="Specify the activation function to use."
+    )
+
+    args = parser.parse_args()
+
+    return args
 
 
 def remove_outliers(data: np.array):
