@@ -43,7 +43,7 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
                                            config_es["early_stopping_epochs"],
                                            config_es["plot"])
 
-    saving_path = f"results/{config_es['dataset']}/{str(config_es['partial_contribution_objective'])}/{str(run_index)}.p"
+    saving_path = f"results/{config_es['dataset']}/partial_contrib={str(config_es['partial_contribution_objective'])}/{str(run_index)}.p"
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))

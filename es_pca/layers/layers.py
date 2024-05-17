@@ -19,6 +19,8 @@ class NonLinearities:
             alpha = 1.6732632423543772848170429916717
             scale = 1.0507009873554804934193349852946
             x = np.where(x > 0, x, alpha * (np.exp(x) - 1))*scale
+        elif self.activation == 'cos':
+            x = np.cos(x)
         elif self.activation == 'identity':
             x = x
         else:
