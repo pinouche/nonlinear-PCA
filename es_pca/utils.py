@@ -160,7 +160,7 @@ def parse_arguments():
 
     parser.add_argument(
         "--partial_contrib",
-        type=bool,
+        type=str,
         default=config["partial_contribution_objective"],
         help="Specify whether or not to use partial contribution objective."
     )

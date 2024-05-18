@@ -17,6 +17,12 @@ warnings.filterwarnings("ignore")
 def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
     args = parse_arguments()
+    if args.partial_contrib == "false":
+        args.partial_contrib = False
+    elif args.partial_contrib == "true":
+        args.partial_contrib = True
+    else:
+        raise ValueError(f"Partial contrib should be in ['false', 'true'], got {args.partial_contrib}.")
 
     x = load_data(args.dataset)
 
