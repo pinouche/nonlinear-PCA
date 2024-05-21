@@ -39,8 +39,8 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
                             num_features_per_network]
     solution = Solution(list_neural_networks)
 
-    logger.info(f"Training Baseline for dataset={args.dataset}, "
-                f"partial_contrib={args.partial_contrib},"
+    logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
+                f"partial_contrib={args.partial_contrib}, "
                 f"activation_function={args.activation}")
 
     obj_list, x_transformed = solution.fit(train_x, val_x,
@@ -73,5 +73,5 @@ if __name__ == "__main__":
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(number_of_runs):
+    for i in range(9, number_of_runs):
         main(config_evo, config_data, i)
