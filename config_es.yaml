@@ -9,7 +9,7 @@ batch_size: 128
 early_stopping_epochs: 1000
 alpha_reg_pca: 0.0
 pca_type: "regular"
-partial_contribution_objective: false
+partial_contribution_objective: "false"
 num_components: 1
 dataset: "circles"
 number_of_runs: 30

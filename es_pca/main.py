@@ -9,7 +9,7 @@ import numpy as np
 from utils import load_data
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments
+from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load
 
 warnings.filterwarnings("ignore")
 
@@ -64,8 +64,10 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
 if __name__ == "__main__":
 
-    with open("./config_es.yaml", "r") as config_data:
-        config_evo = yaml.safe_load(config_data)
+    config_evo = config_load()
+
+    # with open("./config_es.yaml", "r") as config_data:
+    #     config_evo = yaml.safe_load(config_data)
 
     with open("./datasets_config.yaml", "r") as config_data:
         config_data = yaml.safe_load(config_data)
@@ -73,5 +75,5 @@ if __name__ == "__main__":
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(9, number_of_runs):
+    for i in range(11, number_of_runs):
         main(config_evo, config_data, i)
