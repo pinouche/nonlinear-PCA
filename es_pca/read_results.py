@@ -25,22 +25,11 @@ def load_data(path: str) -> list:
     return data_results
 
 
-def compute_quantiles(results_list: list, mode: str) -> tuple[np.array, np.array, np.array]:
-    if mode == "val":
-        index = 1
-    elif mode == "train":
-        index = 0
-    else:
-        raise ValueError(f"mode must be in [val, train], got {mode}.")
+def compute_quantiles(fitness_list: np.array) -> tuple[np.array, np.array, np.array]:
 
-    fitness_list = [results_list[run_number][gen_number].objectives[index][0] for gen_number in
-                    range(len(results_list[0])) for run_number in
-                    range(len(results_list))]
-
-    fitness_list = np.reshape(np.array(fitness_list), (CONFIG["num_generations"], CONFIG["num_of_runs"])) * -1
-    percentiles = (np.quantile(fitness_list, axis=1, q=0.2),
-                   np.quantile(fitness_list, axis=1, q=0.5),
-                   np.quantile(fitness_list, axis=1, q=0.8))
+    percentiles = (np.quantile(fitness_list, axis=0, q=0.2),
+                   np.quantile(fitness_list, axis=0, q=0.5),
+                   np.quantile(fitness_list, axis=0, q=0.8))
 
     return percentiles
 
@@ -134,9 +123,37 @@ if __name__ == "__main__":
                 list_runs.append(data)
             results_dic[file_path] = list_runs
 
+    # objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
+
     print(results_dic.keys())
 
-    #
+    objective_list = [results_dic[list(results_dic.keys())[0]][index][0] for index in range(CONFIG["number_of_runs"])]
+    objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]), (30, 200))
+    objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]), (30, 200))
+
+    percentiles_val = compute_quantiles(objective_val)
+    percentiles_train = compute_quantiles(objective_train)
+
+    print(percentiles_train[0].shape)
+
+    plt.plot()
+    plt.grid(True)
+    plt.plot(np.arange(1, 201, 1), percentiles_val[1], color="darkblue")
+    plt.plot(np.arange(1, 201, 1), percentiles_train[1], color="darkblue", linestyle='--')
+    plt.fill_between(np.arange(1, 201, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001, color="darkblue", alpha=0.2)
+    plt.fill_between(np.arange(1, 201, 1), percentiles_train[0] + 0.001, percentiles_train[2] - 0.001, color="darkblue", alpha=0.2)
+
+    path_to_save = f"./results/plots/{dataset}/quantiles_plot_false.pdf"
+    directory = os.path.dirname(path_to_save)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    plt.savefig(path_to_save, dpi=300)  # Adjust dpi if needed
+    plt.close()
+
+    plt.show()
+
+
     # quantiles_list = []
     # for data in data_list:
     #     val_percentiles = compute_quantiles(data, "val")

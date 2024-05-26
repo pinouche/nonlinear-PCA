@@ -66,14 +66,13 @@ if __name__ == "__main__":
 
     config_evo = config_load()
 
-    # with open("./config_es.yaml", "r") as config_data:
-    #     config_evo = yaml.safe_load(config_data)
-
     with open("./datasets_config.yaml", "r") as config_data:
         config_data = yaml.safe_load(config_data)
         config_data = config_data[config_evo["dataset"]]
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(11, number_of_runs):
-        main(config_evo, config_data, i)
+    # for i in range(number_of_runs):
+    #     main(config_evo, config_data, i)
+
+    main(config_evo, config_data, 8)
