@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     print(results_dic.keys())
 
-    objective_list = [results_dic[list(results_dic.keys())[0]][index][0] for index in range(CONFIG["number_of_runs"])]
+    objective_list = [results_dic[list(results_dic.keys())[1]][index][0] for index in range(CONFIG["number_of_runs"])]
     objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]), (30, 200))
     objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]), (30, 200))
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     plt.fill_between(np.arange(1, 201, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001, color="darkblue", alpha=0.2)
     plt.fill_between(np.arange(1, 201, 1), percentiles_train[0] + 0.001, percentiles_train[2] - 0.001, color="darkblue", alpha=0.2)
 
-    path_to_save = f"./results/plots/{dataset}/quantiles_plot_false.pdf"
+    path_to_save = f"./results/plots/{dataset}/quantiles_plot_true.pdf"
     directory = os.path.dirname(path_to_save)
     if not os.path.exists(directory):
         os.makedirs(directory)
