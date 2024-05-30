@@ -127,48 +127,51 @@ if __name__ == "__main__":
 
     print(results_dic.keys())
 
-    objective_list = [results_dic[list(results_dic.keys())[1]][index][0] for index in range(CONFIG["number_of_runs"])]
-    objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]), (30, 200))
-    objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]), (30, 200))
+    color_list = ["darkblue", "darkgreen", "darkred", "darkorange"]
+    legend_list = ["h=cos, objective=full",
+                   "h=cos, objective=partial",
+                   "h=ReLU, objective=full",
+                   "h=ReLU, objective=partial"]
+    legend_entries = []
+    plt.figure(figsize=(10, 10))
+    plt.ylim(1, 2.1)
+    plt.xlim(1, 100)
 
-    percentiles_val = compute_quantiles(objective_val)
-    percentiles_train = compute_quantiles(objective_train)
+    enumerate_counter = 0
+    for key, value in results_dic.items():
 
-    print(percentiles_train[0].shape)
+        objective_list = [results_dic[key][index][0] for index in range(CONFIG["number_of_runs"])]
+        objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]), (CONFIG["number_of_runs"], CONFIG["epochs"]))
+        objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]), (CONFIG["number_of_runs"], CONFIG["epochs"]))
 
-    plt.plot()
+        percentiles_val = compute_quantiles(objective_val)
+        percentiles_train = compute_quantiles(objective_train)
+
+        #####################################################################
+        color = color_list[enumerate_counter]
+
+        plt.plot(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_val[1], color=color)
+        plt.plot(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_train[1], color=color, linestyle='--')
+        legend_entries.append(legend_list[enumerate_counter])
+        legend_entries.append(f"_")
+        plt.fill_between(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001, color=color, alpha=0.2)
+        plt.fill_between(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_train[0] + 0.001, percentiles_train[2] - 0.001, color=color, alpha=0.2)
+        legend_entries.append(f"_")
+        legend_entries.append(f"_")
+
+        enumerate_counter += 1
+
+    plt.legend(legend_entries, loc="upper left", fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.xticks(np.arange(0, CONFIG["epochs"]+1, 20), fontsize=16)
+    plt.xlabel('Generations', size=16)
+    plt.ylabel("$\mathcal{F}_{\mathrm{total}}^{1}$", size=17)
     plt.grid(True)
-    plt.plot(np.arange(1, 201, 1), percentiles_val[1], color="darkblue")
-    plt.plot(np.arange(1, 201, 1), percentiles_train[1], color="darkblue", linestyle='--')
-    plt.fill_between(np.arange(1, 201, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001, color="darkblue", alpha=0.2)
-    plt.fill_between(np.arange(1, 201, 1), percentiles_train[0] + 0.001, percentiles_train[2] - 0.001, color="darkblue", alpha=0.2)
 
-    path_to_save = f"./results/plots/{dataset}/quantiles_plot_true.pdf"
+    path_to_save = f"./results/plots/{dataset}/quantiles_plot.pdf"
     directory = os.path.dirname(path_to_save)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     plt.savefig(path_to_save, dpi=300)  # Adjust dpi if needed
     plt.close()
-
-    plt.show()
-
-
-    # quantiles_list = []
-    # for data in data_list:
-    #     val_percentiles = compute_quantiles(data, "val")
-    #     train_percentiles = compute_quantiles(data, "train")
-    #     quantiles_list.append((val_percentiles, train_percentiles))
-    #
-    # plot_quantiles(quantiles_list,
-    #                args.dataset)
-    #
-    # max_tree_size = [5, 20, 100]
-    # for i in range(len(data_list)):
-    #     print(f"Producing scatter plots for dataset {results_file_path[i]}...")
-    #     data = data_list[i]
-    #     tree_size = max_tree_size[i]
-    #     plot_2d_scatter(data,
-    #                     args.dataset,
-    #                     tree_size)
-
