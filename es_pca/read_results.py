@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from loguru import logger
 
 from es_pca.utils import config_load
 
@@ -68,10 +69,12 @@ def plot_quantiles(results_dictionary: dict, dataset_name: str = None) -> None:
         percentiles_val = compute_quantiles(objective_val)
         percentiles_train = compute_quantiles(objective_train)
 
-        color = color_list[enumerate_counter]
+        logger.info(f"The objective for the last generation for key {key} is: {percentiles_val[1][-1]}")
 
-        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[1], color=color)
-        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[1], color=color, linestyle='--')
+        c = color_list[enumerate_counter]
+
+        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[1], color=c)
+        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[1], color=c, linestyle='--')
         legend_entries.append(legend_list[enumerate_counter])
         legend_entries.append(f"_")
         # plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001,
@@ -149,3 +152,5 @@ if __name__ == "__main__":
 
     print(results_dic.keys())
     plot_quantiles(results_dic, dataset)
+
+
