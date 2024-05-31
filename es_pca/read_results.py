@@ -34,46 +34,58 @@ def compute_quantiles(fitness_list: np.array) -> tuple[np.array, np.array, np.ar
     return percentiles
 
 
-def plot_quantiles(quantiles: list[tuple[tuple[np.array, np.array, np.array], tuple[np.array, np.array, np.array]]],
-                   dataset: str = None) -> None:
+def plot_quantiles(results_dictionary, dataset_name: str = None) -> None:
 
-    print(f"Producing quantile plots for dataset {dataset}...")
-
-    colors = ["darkblue", "darkgreen", "darkred"]
-    max_tree_size = [5, 20, 100]
+    color_list = ["darkblue", "darkgreen", "darkred", "darkorange"]
+    legend_list = ["h=cos, objective=full",
+                   "h=cos, objective=partial",
+                   "h=ReLU, objective=full",
+                   "h=ReLU, objective=partial"]
     legend_entries = []
     plt.figure(figsize=(10, 10))
     plt.ylim(1, 2.1)
     plt.xlim(1, 100)
 
-    for i, quantiles_tuple in enumerate(quantiles):
-        color = colors[i]
-        val_tuple = quantiles_tuple[0]
-        train_tuple = quantiles_tuple[1]
+    enumerate_counter = 0
+    for key, value in results_dictionary.items():
+        objective_list = [results_dictionary[key][index][0] for index in range(CONFIG["number_of_runs"])]
+        objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]),
+                                   (CONFIG["number_of_runs"], CONFIG["epochs"]))
+        objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]),
+                                     (CONFIG["number_of_runs"], CONFIG["epochs"]))
 
-        plt.plot(np.arange(1, 101, 1), val_tuple[1], color=color)
-        plt.plot(np.arange(1, 101, 1), train_tuple[1], color=color, linestyle='--')
-        legend_entries.append(f"Max size: {max_tree_size[i]}")
+        percentiles_val = compute_quantiles(objective_val)
+        percentiles_train = compute_quantiles(objective_train)
+
+        #####################################################################
+        color = color_list[enumerate_counter]
+
+        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[1], color=color)
+        plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[1], color=color, linestyle='--')
+        legend_entries.append(legend_list[enumerate_counter])
         legend_entries.append(f"_")
-        plt.fill_between(np.arange(1, 101, 1), val_tuple[0] + 0.001, val_tuple[2] - 0.001, color=color, alpha=0.2)
-        plt.fill_between(np.arange(1, 101, 1), train_tuple[0] + 0.001, train_tuple[2] - 0.001, color=color, alpha=0.2)
+        plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001,
+                         color=color, alpha=0.2)
+        plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[0] + 0.001,
+                         percentiles_train[2] - 0.001, color=color, alpha=0.2)
         legend_entries.append(f"_")
         legend_entries.append(f"_")
+
+        enumerate_counter += 1
 
     plt.legend(legend_entries, loc="upper left", fontsize=16)
     plt.yticks(fontsize=16)
-    plt.xticks(np.arange(0, 101, 20), fontsize=16)
+    plt.xticks(np.arange(0, CONFIG["epochs"] + 1, 20), fontsize=16)
     plt.xlabel('Generations', size=16)
     plt.ylabel("$\mathcal{F}_{\mathrm{total}}^{1}$", size=17)
     plt.grid(True)
 
-    path_to_save = f"./results/plots/quantiles_plot_{dataset}.pdf"
+    path_to_save = f"./results/plots/{dataset_name}/quantiles_plot.pdf"
     directory = os.path.dirname(path_to_save)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     plt.savefig(path_to_save, dpi=300)  # Adjust dpi if needed
-    plt.close()
 
 
 def plot_2d_scatter(results_list: list, dataset: str, size: int) -> None:
@@ -127,51 +139,4 @@ if __name__ == "__main__":
 
     print(results_dic.keys())
 
-    color_list = ["darkblue", "darkgreen", "darkred", "darkorange"]
-    legend_list = ["h=cos, objective=full",
-                   "h=cos, objective=partial",
-                   "h=ReLU, objective=full",
-                   "h=ReLU, objective=partial"]
-    legend_entries = []
-    plt.figure(figsize=(10, 10))
-    plt.ylim(1, 2.1)
-    plt.xlim(1, 100)
-
-    enumerate_counter = 0
-    for key, value in results_dic.items():
-
-        objective_list = [results_dic[key][index][0] for index in range(CONFIG["number_of_runs"])]
-        objective_val = np.reshape(np.array([tup[1] for element in objective_list for tup in element]), (CONFIG["number_of_runs"], CONFIG["epochs"]))
-        objective_train = np.reshape(np.array([tup[0] for element in objective_list for tup in element]), (CONFIG["number_of_runs"], CONFIG["epochs"]))
-
-        percentiles_val = compute_quantiles(objective_val)
-        percentiles_train = compute_quantiles(objective_train)
-
-        #####################################################################
-        color = color_list[enumerate_counter]
-
-        plt.plot(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_val[1], color=color)
-        plt.plot(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_train[1], color=color, linestyle='--')
-        legend_entries.append(legend_list[enumerate_counter])
-        legend_entries.append(f"_")
-        plt.fill_between(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001, color=color, alpha=0.2)
-        plt.fill_between(np.arange(1, CONFIG["epochs"]+1, 1), percentiles_train[0] + 0.001, percentiles_train[2] - 0.001, color=color, alpha=0.2)
-        legend_entries.append(f"_")
-        legend_entries.append(f"_")
-
-        enumerate_counter += 1
-
-    plt.legend(legend_entries, loc="upper left", fontsize=16)
-    plt.yticks(fontsize=16)
-    plt.xticks(np.arange(0, CONFIG["epochs"]+1, 20), fontsize=16)
-    plt.xlabel('Generations', size=16)
-    plt.ylabel("$\mathcal{F}_{\mathrm{total}}^{1}$", size=17)
-    plt.grid(True)
-
-    path_to_save = f"./results/plots/{dataset}/quantiles_plot.pdf"
-    directory = os.path.dirname(path_to_save)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    plt.savefig(path_to_save, dpi=300)  # Adjust dpi if needed
-    plt.close()
+    plot_quantiles(results_dic, dataset)
