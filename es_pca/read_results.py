@@ -151,6 +151,12 @@ if __name__ == "__main__":
     #  objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
 
     print(results_dic.keys())
-    plot_quantiles(results_dic, dataset)
+
+    key = list(results_dic.keys())[0]
+    print([val[0][1][1].shape for val in results_dic.values()])
+
+
+
+    # plot_quantiles(results_dic, dataset)
 
 
