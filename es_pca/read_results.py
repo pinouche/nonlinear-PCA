@@ -136,7 +136,6 @@ if __name__ == "__main__":
             results_dic[file_path] = list_runs
 
     # objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
-
     print(results_dic.keys())
 
     plot_quantiles(results_dic, dataset)
