@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(number_of_runs):
+    for i in range(16, number_of_runs):
         main(config_evo, config_data, i)
 
     # main(config_evo, config_data, 8)

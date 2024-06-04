@@ -93,7 +93,7 @@ def plot_quantiles(results_dictionary: dict, dataset_name: str = None) -> None:
     plt.ylabel("$\mathcal{F}_{\mathrm{total}}^{1}$", size=17)
     plt.grid(True)
 
-    path_to_save = f"./results/plots/{dataset_name}/quantiles_plot.pdf"
+    path_to_save = f"./results/plots/{dataset_name}/quantiles_plot_bis.pdf"
     directory = os.path.dirname(path_to_save)
     if not os.path.exists(directory):
         os.makedirs(directory)
