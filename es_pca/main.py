@@ -9,7 +9,7 @@ import numpy as np
 from utils import load_data
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments
+from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load
 
 warnings.filterwarnings("ignore")
 
@@ -39,8 +39,8 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
                             num_features_per_network]
     solution = Solution(list_neural_networks)
 
-    logger.info(f"Training Baseline for dataset={args.dataset}, "
-                f"partial_contrib={args.partial_contrib},"
+    logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
+                f"partial_contrib={args.partial_contrib}, "
                 f"activation_function={args.activation}")
 
     obj_list, x_transformed = solution.fit(train_x, val_x,
@@ -64,8 +64,7 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
 if __name__ == "__main__":
 
-    with open("./config_es.yaml", "r") as config_data:
-        config_evo = yaml.safe_load(config_data)
+    config_evo = config_load()
 
     with open("./datasets_config.yaml", "r") as config_data:
         config_data = yaml.safe_load(config_data)
@@ -73,5 +72,7 @@ if __name__ == "__main__":
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(number_of_runs):
+    for i in range(16, number_of_runs):
         main(config_evo, config_data, i)
+
+    # main(config_evo, config_data, 8)

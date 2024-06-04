@@ -1,7 +1,7 @@
 # Define the arrays for datasets, partial_contribution_objective values, and activation values
-datasets=("circles" "spheres" "alternate_stripes")
-partial_contrib_values=("false")
-activation_values=("cos" "relu")
+datasets=("circles")
+partial_contrib_values=("true")
+activation_values=("relu")
 
 # Loop over each combination of dataset, partial_contrib, and activation
 for dataset in "${datasets[@]}"; do
