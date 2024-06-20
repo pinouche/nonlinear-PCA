@@ -46,11 +46,7 @@ def retrieve_data(results_dictionary: dict, key: str) -> tuple[np.array, np.arra
     return objective_val, objective_train
 
 
-def plot_quantiles(results_dictionary: dict, dataset_name: str = None) -> None:
-
-    # CB_color_cycle = ['#377eb8', '#ff7f00', '#4daf4a',
-    #                   '#f781bf', '#a65628', '#984ea3',
-    #                   '#999999', '#e41a1c', '#dede00']
+def plot_quantiles(results_dictionary: dict, dataset_name: str = None, plot_quantiles_shades: bool = False) -> None:
 
     color_list = ["darkblue", "darkgreen", "darkred", "darkorange"]
     legend_list = ["h=cos, objective=full",
@@ -77,12 +73,14 @@ def plot_quantiles(results_dictionary: dict, dataset_name: str = None) -> None:
         plt.plot(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[1], color=c, linestyle='--')
         legend_entries.append(legend_list[enumerate_counter])
         legend_entries.append(f"_")
-        # plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001,
-        #                  color=color, alpha=0.2)
-        # plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[0] + 0.001,
-        #                  percentiles_train[2] - 0.001, color=color, alpha=0.2)
-        # legend_entries.append(f"_")
-        # legend_entries.append(f"_")
+
+        if plot_quantiles_shades:
+            plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_val[0] + 0.001, percentiles_val[2] - 0.001,
+                             color=c, alpha=0.2)
+            plt.fill_between(np.arange(1, CONFIG["epochs"] + 1, 1), percentiles_train[0] + 0.001,
+                             percentiles_train[2] - 0.001, color=c, alpha=0.2)
+            legend_entries.append(f"_")
+            legend_entries.append(f"_")
 
         enumerate_counter += 1
 
@@ -93,7 +91,7 @@ def plot_quantiles(results_dictionary: dict, dataset_name: str = None) -> None:
     plt.ylabel("$\mathcal{F}_{\mathrm{total}}^{1}$", size=17)
     plt.grid(True)
 
-    path_to_save = f"./results/plots/{dataset_name}/quantiles_plot_bis.pdf"
+    path_to_save = f"./results/plots/{dataset_name}/quantiles_plot_bis_{str(plot_quantiles_shades)}.pdf"
     directory = os.path.dirname(path_to_save)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -152,6 +150,6 @@ if __name__ == "__main__":
 
     print(results_dic.keys())
 
-    plot_quantiles(results_dic, dataset)
+    plot_quantiles(results_dic, dataset, plot_quantiles_shades=True)
 
 
