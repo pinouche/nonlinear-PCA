@@ -20,6 +20,24 @@ def read_arff(path):
     return data
 
 
+def load_data(dataset: str) -> pd.DataFrame:
+
+    if dataset == "spheres":
+        data = make_two_spheres()
+
+    elif dataset == "circles":
+        data = circles_data()
+
+    elif dataset == "alternate_stripes":
+        data = make_alternate_stripes()
+
+    else:
+        path = f"datasets/{dataset}.arff"
+        data = read_arff(path)
+
+    return pd.DataFrame(data)
+
+
 def create_scatter_plot(data_transformed: tuple[np.array, np.array], data_pca_transformed: tuple[np.array, np.array]):
     fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
@@ -45,24 +63,6 @@ def create_scatter_plot(data_transformed: tuple[np.array, np.array], data_pca_tr
     plt.show()
 
 
-def load_data(dataset: str) -> pd.DataFrame:
-
-    if dataset == "spheres":
-        data = make_two_spheres()
-
-    elif dataset == "circles":
-        data = circles_data()
-
-    elif dataset == "alternate_stripes":
-        data = make_alternate_stripes()
-
-    else:
-        path = f"datasets/{dataset}.arff"
-        data = read_arff(path)
-
-    return pd.DataFrame(data)
-
-
 def get_split_indices(data: np.array, random_seed: int) -> Tuple[np.array, np.array]:
     config = config_load()
     val_prop = config["val_prop"]
@@ -86,6 +86,7 @@ def convert_dic_to_list(dictionary: dict) -> list:
 
 
 def transform_data_onehot(data: pd.DataFrame) -> Tuple[pd.DataFrame, list]:
+    print("WE ARE HERE TYPES", data.dtypes)
     object_indices = np.where(data.dtypes == 'object')[0]  # TODO: this means that we curate the data first
 
     if len(object_indices) == 0:

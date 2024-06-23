@@ -26,6 +26,8 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
     x = load_data(args.dataset)
 
+    logger.info(f"The column types of the dataset are: {x.dtypes}")
+
     # transform categorical (object type in pandas) columns to one-hot encoded.
     x, num_features_per_network = transform_data_onehot(x)
     train_indices, val_indices = get_split_indices(x, run_index)
@@ -72,7 +74,5 @@ if __name__ == "__main__":
 
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(7, number_of_runs):
+    for i in range(number_of_runs):
         main(config_evo, config_data, i)
-
-    # main(config_evo, config_data, 8)
