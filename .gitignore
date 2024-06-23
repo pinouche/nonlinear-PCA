@@ -164,3 +164,7 @@ node_modules
 .vscode/
 .vscode-test/
 
+# specific folders
+datasets/**
+notebooks/**
+results/**
