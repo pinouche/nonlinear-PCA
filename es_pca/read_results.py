@@ -114,15 +114,15 @@ def retrieve_transformed_data(results_dictionary: dict, key: str) -> tuple[np.ar
 
 def plot_2d_scatter(train_data_pca: np.array, val_data_pca: np.array, run_num: int, transformed_or_pca: str, key: str) -> None:
 
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(15, 11))
     plt.grid(True)
     plt.scatter(val_data_pca[:, 0], val_data_pca[:, 1], c="red", s=20, edgecolor="k", label="Validation data")
-    plt.scatter(train_data_pca[:, 0], train_data_pca[:, 1], c="blue", s=20, edgecolor="k", alpha=0.8, label="Training data")
-    plt.xticks(size=14)
-    plt.yticks(size=14)
-    plt.xlabel("$x_1$", size=15)
-    plt.ylabel("$x_2$", size=15)
-    plt.legend(fontsize=15)
+    plt.scatter(train_data_pca[:, 0], train_data_pca[:, 1], c="darkblue", s=20, edgecolor="k", alpha=0.8, label="Training data")
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.xlabel(r"$\widetilde{z}_1$", size=20)
+    plt.ylabel(r"$\widetilde{z}_2$", size=20)
+    plt.legend(fontsize=18)
 
     path_to_save = f"./results/plots/scatter_{transformed_or_pca}/{key}/run_number_{run_num}.pdf"
     directory = os.path.dirname(path_to_save)
