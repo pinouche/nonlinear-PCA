@@ -12,6 +12,15 @@ from typing import Tuple
 
 from es_pca.layers.layers import ForwardLayer, BatchNormLayer
 from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
+from es_pca.data_models.data_models import ConfigDataset
+
+
+def dataset_config_load(file_path: str) -> ConfigDataset:
+    """load config file into pydantic object"""
+    with open(file_path) as file:
+        config_data = yaml.safe_load(file)
+
+    return ConfigDataset(**config_data)
 
 
 def read_arff(path):
