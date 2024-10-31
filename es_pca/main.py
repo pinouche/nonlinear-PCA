@@ -1,22 +1,23 @@
-import yaml
 import pickle
 import warnings
 import os
 from loguru import logger
+import argparse
 
 import numpy as np
 
 from utils import load_data
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load
+from es_pca.utils import (get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load,
+                          dataset_config_load)
+from es_pca.data_models.data_models import ConfigDataset
 
 warnings.filterwarnings("ignore")
 
 
-def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
+def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
 
-    args = parse_arguments()
     if args.partial_contrib == "false":
         args.partial_contrib = False
     elif args.partial_contrib == "true":
@@ -66,14 +67,14 @@ def main(config_es: dict, dataset_config: dict, run_index: int) -> None:
 
 if __name__ == "__main__":
 
+    # this is the config for the evolution strategies run
     config_evo = config_load()
+    args = parse_arguments()
 
-
-    with open("./datasets_config.yaml", "r") as config_data:
-        config_data = yaml.safe_load(config_data)
-        config_data = config_data[config_evo["dataset"]]
+    # this is the config for the datasets specifications
+    config_data = dataset_config_load("./datasets_config.yaml", args)
 
     number_of_runs = config_evo["number_of_runs"]
 
     for i in range(number_of_runs):
-        main(config_evo, config_data, i)
+        main(config_evo, config_data, args, i)

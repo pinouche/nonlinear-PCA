@@ -15,10 +15,11 @@ from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, 
 from es_pca.data_models.data_models import ConfigDataset
 
 
-def dataset_config_load(file_path: str) -> ConfigDataset:
+def dataset_config_load(file_path: str, args: argparse.Namespace) -> ConfigDataset:
     """load config file into pydantic object"""
     with open(file_path) as file:
         config_data = yaml.safe_load(file)
+        config_data = config_data[args.dataset]
 
     return ConfigDataset(**config_data)
 

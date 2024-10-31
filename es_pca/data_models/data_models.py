@@ -7,3 +7,4 @@ class ConfigDataset(BaseModel):
     synthetic_bool: bool
     categorical_features: Optional[List[int]] = Field(default_factory=list)
     numerical_features: Optional[List[int]] = Field(default_factory=list)
+
