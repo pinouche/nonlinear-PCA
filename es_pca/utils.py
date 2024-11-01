@@ -30,6 +30,19 @@ def read_arff(path):
     return data
 
 
+def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, np.array]:
+
+    type_class = np.zeros(shape=(1, data.shape[0]))
+    if dataset == "abalone":
+        type_class = data["sex"]
+
+    elif dataset == "phoneme":
+        type_class = data["Class"]
+        # data = data.drop(columns=["Class"])
+
+    return data, type_class
+
+
 def load_data(dataset: str) -> pd.DataFrame:
 
     if dataset == "spheres":
@@ -48,14 +61,17 @@ def load_data(dataset: str) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def create_scatter_plot(data_transformed: tuple[np.array, np.array], data_pca_transformed: tuple[np.array, np.array]):
+def create_scatter_plot(data_transformed: tuple[np.array, np.array],
+                        data_pca_transformed: tuple[np.array, np.array],
+                        classes: tuple[np.array, np.array]) -> None:
+
     fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
     for i, data in enumerate([data_transformed, data_pca_transformed]):
         ax = axes[i]
         ax.grid(True)
-        ax.scatter(data[0][:, 0], data[0][:, 1], c="blue", s=20, edgecolor="k", alpha=0.5, label="Training data")
-        ax.scatter(data[1][:, 0], data[1][:, 1], c="red", s=20, edgecolor="k", label="Validation data")
+        ax.scatter(data[0][:, 0], data[0][:, 1], c=classes[0], s=20, edgecolor="k", alpha=0.5, label="Training data")
+        ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)

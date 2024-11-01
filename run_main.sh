@@ -1,6 +1,6 @@
 # Define the arrays for datasets, partial_contribution_objective values, and activation values
-datasets=("phoneme")
-partial_contrib_values=("false")
+datasets=("abalone")
+partial_contrib_values=("true")
 activation_values=("relu")
 
 # Loop over each combination of dataset, partial_contrib, and activation

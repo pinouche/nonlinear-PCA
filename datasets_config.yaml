@@ -34,3 +34,17 @@ phoneme:
     - 2
     - 3
     - 4
+
+abalone:
+  num_features: 8
+  synthetic_bool: false
+  categorical_features:
+    - 0
+  numerical_features:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7

@@ -1,5 +1,5 @@
 hidden_layer_size: 64
-activation: "cos"
+activation: "relu"
 n_hidden_layers: 2
 pop_size: 500
 sigma: 0.01
@@ -12,10 +12,10 @@ pca_type: "regular"
 partial_contribution_objective: "false"
 num_components: 1
 dataset: "circles"
-number_of_runs: 30
-remove_outliers: true
+number_of_runs: 1
+remove_outliers: false
 n_outliers: 20
-plot: false
+plot: true
 val_prop: 0.2
 
 

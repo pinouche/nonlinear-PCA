@@ -61,7 +61,7 @@ class Solution:
         self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
                          for i in range(len(self.networks))]
 
-    def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int,
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float, learning_rate: float, pop_size: int,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
             verbose: bool = False) -> Tuple:
 
@@ -113,14 +113,17 @@ class Solution:
                 if early_stopping_iterations >= early_stopping:
                     break
 
-            if verbose and epoch % 10 == 0:
+            if verbose and epoch % 1 == 0:
                 self.plot((x_transformed_train, x_transformed_val),
-                          (pca_transformed_train, pca_transformed_val))
+                          (pca_transformed_train, pca_transformed_val),
+                          classes)
 
         return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
 
-    def plot(self, x_transformed: tuple[np.array, np.array], pca_transformed: tuple[np.array, np.array]) -> None:
-        create_scatter_plot(x_transformed, pca_transformed)
+    def plot(self, x_transformed: tuple[np.array, np.array],
+             pca_transformed: tuple[np.array, np.array],
+             classes: tuple[np.array, np.array]) -> None:
+        create_scatter_plot(x_transformed, pca_transformed, classes)
 
     def predict(self, x: np.ndarray, sigma: float = None, list_noise: list = None, train: bool = True) -> np.ndarray:
         x_transformed = np.empty((x.shape[0], len(self.networks)))
