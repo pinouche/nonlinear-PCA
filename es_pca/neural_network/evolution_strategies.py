@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from typing import List, Tuple
@@ -113,7 +114,8 @@ class Solution:
                 if early_stopping_iterations >= early_stopping:
                     break
 
-            if verbose and epoch % 1 == 0:
+            if verbose and epoch % 10 == 0:
+
                 self.plot((x_transformed_train, x_transformed_val),
                           (pca_transformed_train, pca_transformed_val),
                           classes)

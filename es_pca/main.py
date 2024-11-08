@@ -27,6 +27,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
         raise ValueError(f"Partial contrib should be in ['false', 'true'], got {args.partial_contrib}.")
 
     x = load_data(args.dataset)
+    x = x.dropna()
     x, classes = preprocess_data(x, args.dataset)
     classes, mapping = pd.factorize(classes)
 
@@ -40,6 +41,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
+
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
 
