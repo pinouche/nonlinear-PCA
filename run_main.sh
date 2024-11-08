@@ -1,5 +1,5 @@
 # Define the arrays for datasets, partial_contribution_objective values, and activation values
-datasets=("german_credit")
+datasets=("dermatology")
 partial_contrib_values=("true")
 activation_values=("relu")
 

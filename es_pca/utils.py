@@ -31,7 +31,6 @@ def read_arff(path):
 
 
 def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, np.array]:
-
     type_class = np.zeros(shape=(1, data.shape[0]))
     if dataset == "abalone":
         type_class = data["sex"]
@@ -39,14 +38,13 @@ def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, np.
     elif dataset in ["phoneme", "breast_cancer"]:
         type_class = data["Class"]
 
-    elif dataset in ["wine", "ionosphere", "german_credit"]:
+    elif dataset in ["wine", "ionosphere", "german_credit", "dermatology"]:
         type_class = data["class"]
 
     return data, type_class
 
 
 def load_data(dataset: str) -> pd.DataFrame:
-
     if dataset == "spheres":
         data = make_two_spheres()
 
@@ -66,14 +64,13 @@ def load_data(dataset: str) -> pd.DataFrame:
 def create_scatter_plot(data_transformed: tuple[np.array, np.array],
                         data_pca_transformed: tuple[np.array, np.array],
                         classes: tuple[np.array, np.array]) -> None:
-
     fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
     for i, data in enumerate([data_transformed, data_pca_transformed]):
         ax = axes[i]
         ax.grid(True)
         ax.scatter(data[0][:, 0], data[0][:, 1], c=classes[0], s=20, edgecolor="k", alpha=0.5, label="Training data")
-        ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
+        # ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)
@@ -114,7 +111,6 @@ def convert_dic_to_list(dictionary: dict) -> list:
 
 
 def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list]:
-
     object_indices = np.array(object_indices)
     data_to_one_hot = data.iloc[:, object_indices]
 
@@ -131,13 +127,12 @@ def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tupl
 
 
 def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):
-
     layers_list = list()
 
     layers_list.append(ForwardLayer(n_features, hidden_size, activation))
     layers_list.append(BatchNormLayer(hidden_size))
 
-    for _ in range(n_layers-1):
+    for _ in range(n_layers - 1):
         layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
         layers_list.append(BatchNormLayer(hidden_size))
 
@@ -146,19 +141,9 @@ def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="l
     return layers_list
 
 
-def create_nn_for_categorical_col(n_features):
-
-    layer = [ForwardLayer(n_features, 1, "identity")]  # simply a single linear layer
-
-    return layer
-
-
 def create_network(n_features, n_layers, hidden_size, activation="leaky_relu"):
 
-    if n_features > 1:  # for dealing with categorical variables
-        layers_list = create_nn_for_categorical_col(n_features)
-    else:
-        layers_list = create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation=activation)
+    layers_list = create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation=activation)
 
     return layers_list
 
@@ -171,7 +156,6 @@ def config_load() -> dict:
 
 
 def parse_arguments():
-
     config = config_load()
 
     parser = argparse.ArgumentParser(description="test", conflict_handler="resolve")
