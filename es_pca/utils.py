@@ -38,7 +38,7 @@ def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, np.
     elif dataset in ["phoneme", "breast_cancer"]:
         type_class = data["Class"]
 
-    elif dataset in ["wine", "ionosphere", "german_credit", "dermatology"]:
+    elif dataset in ["wine", "ionosphere", "german_credit", "dermatology", "heart-statlog"]:
         type_class = data["class"]
 
     return data, type_class
