@@ -6,7 +6,7 @@ Non-linear PCA by training neural networks using Evolution Strategies (ES). The 
 This script can be run directly with:
 
 ```
-python3 src/main.py 
+python es_pca/main.py --dataset <dataset> --partial_contrib <partial_contrib> --activation <activation>
 ```
 
 or, alternatively, one can run the provided bash file:
@@ -24,3 +24,7 @@ The ```config_es.yaml``` contains all the parameters to fully specify a ES run (
 python3 es_pca/read_results.py --dataset <dataset>
 ```
 
+# Formatting of the datasets
+
+The column types of the dataset must be defined in the datasets_config.yaml file. Each categorical variable will then be
+automatically converted to one-hot and use the appropriate transformations.

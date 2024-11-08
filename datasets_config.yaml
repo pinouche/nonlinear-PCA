@@ -1,19 +1,215 @@
 circles:
-  num-features: 2
-  synthetic-bool: true
-  contains-categorical: false
+  num_features: 2
+  synthetic_bool: true
+  categorical_features:
+  numerical_features:
+    - 0
+    - 1
 
 spheres:
-  num-features: 3
-  synthetic-bool: true
-  contains-categorical: false
+  num_features: 3
+  synthetic_bool: true
+  categorical_features:
+  numerical_features:
+    - 0
+    - 1
+    - 2
 
 alternate_stripes:
-  num-features: 2
-  synthetic-bool: true
-  contains-categorical: false
+  num_features: 2
+  synthetic_bool: true
+  categorical_features:
+  numerical_features:
+    - 0
+    - 1
 
 phoneme:
-  num-features: 6
-  synthetic-bool: false
-  contains-categorical: true
+  num_features: 6
+  synthetic_bool: false
+  categorical_features:
+    - 5
+  numerical_features:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+
+abalone:
+  num_features: 8
+  synthetic_bool: false
+  categorical_features:
+    - 0
+  numerical_features:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+
+wine:
+  num_features: 13
+  synthetic_bool: false
+  categorical_features:
+    - 0
+  numerical_features:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+
+german_credit:
+  num_features: 21
+  synthetic_bool: false
+  categorical_features:
+    - 0
+    - 2
+    - 3
+    - 5
+    - 6
+    - 8
+    - 9
+    - 11
+    - 13
+    - 14
+    - 16
+    - 18
+    - 19
+    - 20
+  numerical_features:
+    - 1
+    - 4
+    - 7
+    - 10
+    - 12
+    - 15
+    - 17
+
+
+breast_cancer:
+  num_features: 10
+  synthetic_bool: false
+  categorical_features:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+  numerical_features:
+  
+heart-statlog:
+  num_features: 14
+  synthetic_bool: false
+  categorical_features:
+    - 13
+  numerical_features:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+  
+dermatology:
+  num_features: 35
+  synthetic_bool: false
+  categorical_features:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 34
+  numerical_features:
+    - 33
+
+ionosphere:
+  num_features: 35
+  synthetic_bool: false
+  categorical_features:
+    - 34
+  numerical_features:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33

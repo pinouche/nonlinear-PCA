@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from typing import List, Tuple
@@ -20,21 +21,9 @@ class Solution:
 
         for p in range(pop_size):
 
-            x_transformed = np.empty((x_batch.shape[0], len(self.networks)))
             # get the noise. This generates noise for each of the neural network
             list_noise = [net.get_noise_network() for net in self.networks]
-
-            input_index = 0
-            for i, network in enumerate(self.networks):
-
-                input_dim = network.layers[0].weights.shape[0]  # we can ignore this "unresolved attribute"
-
-                perturbed_layers = network.perturb(list_noise[i], sigma)
-                perturbed_network = NeuralNetwork(perturbed_layers)
-                output_perturbed_network = perturbed_network.predict(x_batch[:, input_index:input_index+input_dim])
-                x_transformed[:, i] = np.squeeze(output_perturbed_network)
-
-                input_index += input_dim
+            x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
             f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
@@ -73,7 +62,7 @@ class Solution:
         self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
                          for i in range(len(self.networks))]
 
-    def fit(self, x_train: np.ndarray, x_val: np.ndarray, sigma: float, learning_rate: float, pop_size: int,
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float, learning_rate: float, pop_size: int,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
             verbose: bool = False) -> Tuple:
 
@@ -96,12 +85,12 @@ class Solution:
                 self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
                 # print("DONE BATCH")
 
-            # evaluate objective at the end of the epoch on the training set
-            x_transformed_train = self.predict(x_train, True)
+            # evaluate objective at the end of the epoch on the training set.
+            x_transformed_train = self.predict(x_train, train=True)
             objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, partial_contribution_objective, num_components, True)
 
             # evaluate objective at the end of the epoch on the validation set
-            x_transformed_val = self.predict(x_val, False)
+            x_transformed_val = self.predict(x_val, train=False)
             objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, partial_contribution_objective, num_components, False)
 
             # for partial contribution = True, each element is the explained variance for each variable.
@@ -126,19 +115,34 @@ class Solution:
                     break
 
             if verbose and epoch % 10 == 0:
+
                 self.plot((x_transformed_train, x_transformed_val),
-                          (pca_transformed_train, pca_transformed_val))
+                          (pca_transformed_train, pca_transformed_val),
+                          classes)
 
         return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
 
-    def plot(self, x_transformed: tuple[np.array, np.array], pca_transformed: tuple[np.array, np.array]) -> None:
-        create_scatter_plot(x_transformed, pca_transformed)
+    def plot(self, x_transformed: tuple[np.array, np.array],
+             pca_transformed: tuple[np.array, np.array],
+             classes: tuple[np.array, np.array]) -> None:
+        create_scatter_plot(x_transformed, pca_transformed, classes)
 
-    def predict(self, x: np.ndarray, train: bool = True) -> np.ndarray:
-        x_transformed = np.empty(x.shape)
+    def predict(self, x: np.ndarray, sigma: float = None, list_noise: list = None, train: bool = True) -> np.ndarray:
+        x_transformed = np.empty((x.shape[0], len(self.networks)))
+
+        input_index = 0
         for i, network in enumerate(self.networks):
-            output_perturbed_network = network.predict(x[:, i], train)
+            # here, we get the dimension of the inputs to know which variables of the dataset it corresponds to.
+            input_dim = network.layers[0].weights.shape[0]  # we can ignore this "unresolved attribute"
+
+            perturbed_network = network
+            if list_noise:
+                perturbed_layers = network.perturb(list_noise[i], sigma)
+                perturbed_network = NeuralNetwork(perturbed_layers)
+
+            output_perturbed_network = perturbed_network.predict(x[:, input_index:input_index + input_dim], train)
             x_transformed[:, i] = np.squeeze(output_perturbed_network)
+            input_index += input_dim
 
         return x_transformed
 
