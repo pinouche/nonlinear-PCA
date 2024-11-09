@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from typing import List, Tuple
@@ -82,7 +81,8 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
+                if mini_batch_x.shape[0] >= mini_batch_x.shape[1]:  # n_components must be between 0 and min(n_samples, n_features)
+                    self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
                 # print("DONE BATCH")
 
             # evaluate objective at the end of the epoch on the training set.

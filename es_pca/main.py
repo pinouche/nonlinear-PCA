@@ -42,6 +42,8 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
 
+    print(train_indices.shape, val_indices.shape)
+
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
 

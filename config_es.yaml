@@ -16,7 +16,7 @@ number_of_runs: 1
 remove_outliers: false
 n_outliers: 20
 plot: true
-val_prop: 0.1
+val_prop: 0.5
 
 
 
