@@ -69,8 +69,6 @@ def compute_fitness(data_transformed: np.array,
         data_transformed = remove_outliers(data_transformed)
     data_transformed = scale(data_transformed, axis=0)
 
-    print("SHAPE 2", data_transformed.shape)
-
     pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed))
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
