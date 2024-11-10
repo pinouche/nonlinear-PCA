@@ -1,8 +1,9 @@
 import copy
 import numpy as np
+import pickle
+import os
 
 from typing import Union, Any
-
 from sklearn.decomposition import SparsePCA, PCA
 from sklearn.preprocessing import scale
 
@@ -43,18 +44,38 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     return np.array(arr_contrib)
 
 
-def get_pca(data: np.array) -> tuple[PCA, np.array]:
+def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
+    pca_path = "pca_model.pkl"
+
+    # Scale the input data
     data = scale(data, axis=0)
 
+    # Initialize the PCA model based on the type specified
     if pca_type == "sparse":
         pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG["alpha_reg_pca"])
     elif pca_type == "regular":
         pca = PCA(n_components=data.shape[1])
     else:
-        raise ValueError(f"pca_type is not valid, expected to be one of [sparse, robust, regular], got {pca_type}")
+        raise ValueError(f"Invalid pca_type: {pca_type}. Expected one of ['sparse', 'regular'].")
 
+    # Fit PCA and save the model using pickle
     pca.fit(data)
+
+    if save_pca_model and training_mode:
+        with open(pca_path, "wb") as file:
+            pickle.dump(pca, file)
+        print(f"PCA model saved to {pca_path}")
+
+    if not training_mode:
+        # Load the PCA model from the saved file
+        if not os.path.exists(pca_path):
+            raise FileNotFoundError(f"PCA model file '{pca_path}' not found.")
+
+        with open(pca_path, "rb") as file:
+            pca = pickle.load(file)
+        print(f"PCA model loaded from {pca_path}")
+
     pca_transformed_data = pca.transform(data)
 
     return pca, pca_transformed_data
@@ -63,24 +84,25 @@ def get_pca(data: np.array) -> tuple[PCA, np.array]:
 def compute_fitness(data_transformed: np.array,
                     training_mode: bool = True,
                     partial_contribution_objective: bool = False,
-                    k: int = 1) -> Union[list, Any]:
+                    k: int = 1,
+                    save_pca_model: bool = False) -> Union[list, Any]:
 
     if CONFIG["remove_outliers"] and training_mode:
         data_transformed = remove_outliers(data_transformed)
     data_transformed = scale(data_transformed, axis=0)
 
-    pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed))
+    pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed), training_mode, save_pca_model)
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 
     variance_contrib = get_contribs(cov_matrix, pca_model.components_, p)
 
     if partial_contribution_objective:
+        # this is using our novel objective function (breaking down the variance contribution per variable)
         score = np.sum(variance_contrib[:k], axis=0)
     else:
+        # this is the regular PCA total explained variance
         score = [np.sum(variance_contrib[:k])]*p
-    #
-    # print(f"the variance contribution is: {score}")
 
     return score, pca_transformed_data
 

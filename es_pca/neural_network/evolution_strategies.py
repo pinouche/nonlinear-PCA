@@ -24,7 +24,7 @@ class Solution:
             list_noise = [net.get_noise_network() for net in self.networks]
             x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
-            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True)
+            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True, False)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
@@ -86,11 +86,19 @@ class Solution:
 
             # evaluate objective at the end of the epoch on the training set.
             x_transformed_train = self.predict(x_train, train=True)
-            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, partial_contribution_objective, num_components, True)
+            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train,
+                                                                         partial_contribution_objective,
+                                                                         num_components,
+                                                                         True,
+                                                                         True)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, train=False)
-            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, partial_contribution_objective, num_components, False)
+            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val,
+                                                                     partial_contribution_objective,
+                                                                     num_components,
+                                                                     False,
+                                                                     False)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
@@ -149,12 +157,14 @@ class Solution:
                        x_transformed: np.ndarray,
                        partial_contribution_objective: bool,
                        num_components: int,
-                       training_mode: bool) -> tuple[list[float], np.array]:
+                       training_mode: bool,
+                       save_pca_model: bool) -> tuple[list[float], np.array]:
 
         objective_value, pca_transformed = compute_fitness(x_transformed,
                                                            training_mode,
                                                            partial_contribution_objective,
-                                                           num_components)
+                                                           num_components,
+                                                           save_pca_model)
 
         return objective_value, pca_transformed
 
