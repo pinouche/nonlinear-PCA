@@ -5,7 +5,7 @@ import os
 
 from typing import Union, Any
 from sklearn.decomposition import SparsePCA, PCA
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, StandardScaler
 
 from es_pca.utils import config_load, remove_outliers
 
@@ -89,9 +89,28 @@ def compute_fitness(data_transformed: np.array,
 
     if CONFIG["remove_outliers"] and training_mode:
         data_transformed = remove_outliers(data_transformed)
-    data_transformed = scale(data_transformed, axis=0)
 
-    pca_model, pca_transformed_data = get_pca(copy.deepcopy(data_transformed), training_mode, save_pca_model)
+    scaler_path = "scaler_model.pkl"
+    scaler = StandardScaler()
+    scaler.fit(data_transformed)
+
+    if save_pca_model and training_mode:
+        with open(scaler_path, "wb") as file:
+            pickle.dump(scaler, file)
+        print(f"PCA model saved to {scaler_path}")
+
+    if not training_mode:
+        # Load the PCA model from the saved file
+        if not os.path.exists(scaler_path):
+            raise FileNotFoundError(f"PCA model file '{scaler_path}' not found.")
+
+        with open(scaler_path, "rb") as file:
+            scaler = pickle.load(file)
+        print(f"PCA model loaded from {scaler_path}")
+
+    data_transformed = scaler.transform(data_transformed)
+
+    pca_model, pca_transformed_data = get_pca(data_transformed, training_mode, save_pca_model)
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 
