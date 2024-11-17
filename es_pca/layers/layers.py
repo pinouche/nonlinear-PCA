@@ -14,11 +14,11 @@ class NonLinearities:
         elif self.activation == 'leaky_relu':
             x = np.where(x > 0, x, x * 0.01)
         elif self.activation == 'sigmoid':
-            x = 1/(1+np.exp(x*-1))
+            x = 1 / (1 + np.exp(x * -1))
         elif self.activation == 'selu':
             alpha = 1.6732632423543772848170429916717
             scale = 1.0507009873554804934193349852946
-            x = np.where(x > 0, x, alpha * (np.exp(x) - 1))*scale
+            x = np.where(x > 0, x, alpha * (np.exp(x) - 1)) * scale
         elif self.activation == 'cos':
             x = np.cos(x)
         elif self.activation == 'identity':
@@ -83,7 +83,7 @@ class MonotonicForwardLayer(Layer):
         if self.monotonicity == "increasing":
             z = np.exp(self.weights)
         elif self.monotonicity == "decreasing":
-            z = -1*np.exp(self.weights)
+            z = -1 * np.exp(self.weights)
         else:
             raise ValueError('Invalid motonicity {}'.format(self.monotonicity))
 
@@ -92,7 +92,6 @@ class MonotonicForwardLayer(Layer):
         return x
 
 
-# TODO: Implement virtual batch normalization as in the Tim Salimans Paper
 class BatchNormLayer(Layer):
 
     def __init__(self, dims: int) -> None:
@@ -148,4 +147,3 @@ class BatchNormLayer(Layer):
 
     def get_layer_weights(self) -> Tuple:
         return np.array([0]), np.array([0])
-

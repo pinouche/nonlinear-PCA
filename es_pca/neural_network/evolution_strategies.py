@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from typing import List, Tuple
@@ -25,7 +24,7 @@ class Solution:
             list_noise = [net.get_noise_network() for net in self.networks]
             x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
-            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True)
+            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True, False)
             assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
@@ -82,16 +81,24 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
-                # print("DONE BATCH")
+                if mini_batch_x.shape[0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                    self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
 
             # evaluate objective at the end of the epoch on the training set.
             x_transformed_train = self.predict(x_train, train=True)
-            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train, partial_contribution_objective, num_components, True)
+            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train,
+                                                                         partial_contribution_objective,
+                                                                         num_components,
+                                                                         True,
+                                                                         True)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, train=False)
-            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val, partial_contribution_objective, num_components, False)
+            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val,
+                                                                     partial_contribution_objective,
+                                                                     num_components,
+                                                                     False,
+                                                                     False)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
@@ -114,7 +121,7 @@ class Solution:
                 if early_stopping_iterations >= early_stopping:
                     break
 
-            if verbose and epoch % 10 == 0:
+            if verbose and epoch % 1 == 0:
 
                 self.plot((x_transformed_train, x_transformed_val),
                           (pca_transformed_train, pca_transformed_val),
@@ -150,12 +157,14 @@ class Solution:
                        x_transformed: np.ndarray,
                        partial_contribution_objective: bool,
                        num_components: int,
-                       training_mode: bool) -> tuple[list[float], np.array]:
+                       training_mode: bool,
+                       save_pca_model: bool) -> tuple[list[float], np.array]:
 
         objective_value, pca_transformed = compute_fitness(x_transformed,
                                                            training_mode,
                                                            partial_contribution_objective,
-                                                           num_components)
+                                                           num_components,
+                                                           save_pca_model)
 
         return objective_value, pca_transformed
 
