@@ -127,6 +127,10 @@ class Solution:
                           (pca_transformed_train, pca_transformed_val),
                           classes)
 
+            # TODO: implement the below
+            # save results here (pca_model, scaler_model, train_indices, val_indices, objectives) to the objective list
+            # modify naming "objective_list" to results list and maybe write a pydantic model for this object.
+
         return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
 
     def plot(self, x_transformed: tuple[np.array, np.array],
