@@ -122,7 +122,7 @@ def compute_fitness(data_transformed: np.array,
         # this is the regular PCA total explained variance
         score = [np.sum(variance_contrib[:k])]*p
 
-    return score, pca_transformed_data
+    return score, pca_transformed_data, pca_model, scaler
 
 
 

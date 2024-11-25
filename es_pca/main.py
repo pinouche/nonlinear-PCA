@@ -70,7 +70,9 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                                            config_es["epochs"],
                                            config_es["batch_size"],
                                            config_es["early_stopping_epochs"],
-                                           config_es["plot"],
+                                           train_indices,
+                                           val_indices,
+                                           config_es["plot"]
                                            )
 
     saving_path = f"results/{args.dataset}/activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p"
