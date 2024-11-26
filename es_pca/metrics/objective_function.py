@@ -43,9 +43,9 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     return np.array(arr_contrib)
 
 
-def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
+def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
-    pca_path = "pca_model.pkl"
+    pca_path = f"tmp/pca_model_{run_index}.pkl"
 
     # Scale the input data
     data = scale(data, axis=0)
@@ -80,7 +80,8 @@ def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[
     return pca, pca_transformed_data
 
 
-def compute_fitness(data_transformed: np.array,
+def compute_fitness(run_index: int,
+                    data_transformed: np.array,
                     training_mode: bool = True,
                     partial_contribution_objective: bool = False,
                     k: int = 1,
@@ -89,7 +90,7 @@ def compute_fitness(data_transformed: np.array,
     if CONFIG["remove_outliers"] and training_mode:
         data_transformed = remove_outliers(data_transformed)
 
-    scaler_path = "scaler_model.pkl"
+    scaler_path = f"tmp/scaler_model_{run_index}.pkl"
     scaler = StandardScaler()
     scaler.fit(data_transformed)
 
