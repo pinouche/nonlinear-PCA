@@ -110,7 +110,10 @@ def compute_fitness(run_index: int,
 
     data_transformed = scaler.transform(data_transformed)
 
-    pca_model, pca_transformed_data = get_pca(data_transformed, training_mode, save_pca_model)
+    pca_model, pca_transformed_data = get_pca(run_index,
+                                              data_transformed,
+                                              training_mode,
+                                              save_pca_model)
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 

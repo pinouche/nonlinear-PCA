@@ -16,7 +16,7 @@ class Solution:
         self.networks = network_list
 
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int,
-               partial_contribution_objective: bool, num_components: int) -> None:
+               partial_contribution_objective: bool, num_components: int, run_index: int) -> None:
 
         dict_weighted_noise = {}
 
@@ -26,7 +26,12 @@ class Solution:
             list_noise = [net.get_noise_network() for net in self.networks]
             x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
-            f_obj, _, _, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True, False)
+            f_obj, _, _, _ = self.evaluate_model(x_transformed,
+                                                 partial_contribution_objective,
+                                                 num_components,
+                                                 True,
+                                                 False,
+                                                 run_index)
             assert len(f_obj) == len(
                 list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
@@ -90,8 +95,13 @@ class Solution:
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
                 if mini_batch_x.shape[0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
-                    self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective,
-                                num_components)
+                    self.update(mini_batch_x,
+                                sigma,
+                                learning_rate,
+                                pop_size,
+                                partial_contribution_objective,
+                                num_components,
+                                run_index)
 
             # evaluate objective at the end of the epoch on the training set.
             x_transformed_train = self.predict(x_train, train=True)
@@ -99,7 +109,8 @@ class Solution:
                                                                                             partial_contribution_objective,
                                                                                             num_components,
                                                                                             True,
-                                                                                            True)
+                                                                                            True,
+                                                                                            run_index)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, train=False)
@@ -107,7 +118,8 @@ class Solution:
                                                                                         partial_contribution_objective,
                                                                                         num_components,
                                                                                         False,
-                                                                                        False)
+                                                                                        False,
+                                                                                        run_index)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
