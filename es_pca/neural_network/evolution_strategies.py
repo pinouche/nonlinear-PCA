@@ -73,9 +73,9 @@ class Solution:
             learning_rate: float, pop_size: int,
             partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int,
             early_stopping: int,
-            run_index: int,
             train_indices: np.array,
             val_indices: np.array,
+            run_index: int,
             verbose: bool = False) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
 
         result_list = []

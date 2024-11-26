@@ -45,7 +45,7 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
 
 def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
-    pca_path = f"tmp/pca_model_{run_index}.pkl"
+    pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
     # Scale the input data
     data = scale(data, axis=0)
@@ -64,7 +64,7 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
     if save_pca_model and training_mode:
         with open(pca_path, "wb") as file:
             pickle.dump(pca, file)
-        print(f"PCA model saved to {pca_path}")
+        # print(f"PCA model saved to {pca_path}")
 
     if not training_mode:
         # Load the PCA model from the saved file
@@ -73,7 +73,7 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
 
         with open(pca_path, "rb") as file:
             pca = pickle.load(file)
-        print(f"PCA model loaded from {pca_path}")
+        # print(f"PCA model loaded from {pca_path}")
 
     pca_transformed_data = pca.transform(data)
 
@@ -90,14 +90,14 @@ def compute_fitness(run_index: int,
     if CONFIG["remove_outliers"] and training_mode:
         data_transformed = remove_outliers(data_transformed)
 
-    scaler_path = f"tmp/scaler_model_{run_index}.pkl"
+    scaler_path = f"tmp_files/scaler_model_{run_index}.pkl"
     scaler = StandardScaler()
     scaler.fit(data_transformed)
 
     if save_pca_model and training_mode:
         with open(scaler_path, "wb") as file:
             pickle.dump(scaler, file)
-        print(f"PCA model saved to {scaler_path}")
+        # print(f"PCA model saved to {scaler_path}")
 
     if not training_mode:
         # Load the PCA model from the saved file
@@ -106,7 +106,7 @@ def compute_fitness(run_index: int,
 
         with open(scaler_path, "rb") as file:
             scaler = pickle.load(file)
-        print(f"PCA model loaded from {scaler_path}")
+        # print(f"PCA model loaded from {scaler_path}")
 
     data_transformed = scaler.transform(data_transformed)
 

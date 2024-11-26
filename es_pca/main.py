@@ -4,12 +4,11 @@ import os
 from loguru import logger
 import argparse
 import multiprocessing
-import shutil
 
 import pandas as pd
 import numpy as np
 
-from utils import load_data
+from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import (get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load,
@@ -42,8 +41,6 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
-
-    print(train_indices.shape, val_indices.shape)
 
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
@@ -96,9 +93,10 @@ def run_single_iteration(args: argparse.Namespace):
 if __name__ == "__main__":
 
     # make sure this temp dir is empty (with no artifacts from the run on the previous dataset)
-    if not os.path.exists("tmp_files/"):
-        os.makedirs(os.path.dirname("tmp_files/"))
-    shutil.rmtree("tmp_files/")
+    tmp_path = "./tmp_files/"
+    if not os.path.exists(tmp_path):
+        os.makedirs(tmp_path)
+    remove_files_from_dir(tmp_path)
 
     # Load configurations
     config_evo = config_load()
