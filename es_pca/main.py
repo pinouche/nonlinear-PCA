@@ -95,9 +95,10 @@ def run_single_iteration(args: argparse.Namespace):
 
 if __name__ == "__main__":
 
-    # make sure this temp dir is
+    # make sure this temp dir is empty (with no artifacts from the run on the previous dataset)
+    if not os.path.exists("./tmp_files"):
+        os.makedirs(os.path.dirname("./tmp_files"))
     shutil.rmtree("./tmp_files")
-    os.makedirs(os.path.dirname("./tmp_files"))
 
     # Load configurations
     config_evo = config_load()
