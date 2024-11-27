@@ -71,7 +71,10 @@ class Solution:
 
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float,
             learning_rate: float, pop_size: int,
-            partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int,
+            partial_contribution_objective: bool,
+            num_components: int,
+            epochs: int,
+            batch_size: int,
             early_stopping: int,
             train_indices: np.array,
             val_indices: np.array,
