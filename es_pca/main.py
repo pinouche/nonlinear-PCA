@@ -74,7 +74,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                                 config_es["plot"]
                                 )
 
-    saving_path = f"results/{args.dataset}/activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p"
+    dataset_folder = "real_world_data"
+    if args.dataset in ["circles", "spheres", "alternate_stripes"]:
+        dataset_folder = "synthetic_data"
+
+    saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                   f"activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))
