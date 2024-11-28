@@ -48,7 +48,7 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
     pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
     # Scale the input data
-    data = scale(data, axis=0)
+    # data = scale(data, axis=0)
 
     # Initialize the PCA model based on the type specified
     if pca_type == "sparse":
@@ -121,10 +121,13 @@ def compute_fitness(run_index: int,
 
     if partial_contribution_objective:
         # this is using our novel objective function (breaking down the variance contribution per variable)
-        score = np.sum(variance_contrib[:k], axis=0)
+        score = np.sum(variance_contrib[:k], axis=0)/np.sum(np.var(data_transformed, axis=0))
     else:
         # this is the regular PCA total explained variance
-        score = [np.sum(variance_contrib[:k])]*p
+        score = [np.sum(variance_contrib[:k])/np.sum(np.var(data_transformed, axis=0))]*p
+
+    # numbers cannot be above 1 as they are standardized by the total amount of variance in the data
+    assert all(num < 1 for num in score), "Not all numbers are below 1"
 
     return score, pca_transformed_data, pca_model, scaler
 
