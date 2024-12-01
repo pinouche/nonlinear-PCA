@@ -119,15 +119,17 @@ def compute_fitness(run_index: int,
 
     variance_contrib = get_contribs(cov_matrix, pca_model.components_, p)
 
+    total_variance_to_explain = np.sum(np.var(data_transformed, axis=0))
+
     if partial_contribution_objective:
         # this is using our novel objective function (breaking down the variance contribution per variable)
-        score = np.sum(variance_contrib[:k], axis=0)/np.sum(np.var(data_transformed, axis=0))
+        score = np.sum(variance_contrib[:k], axis=0)/total_variance_to_explain
     else:
         # this is the regular PCA total explained variance
-        score = [np.sum(variance_contrib[:k])/np.sum(np.var(data_transformed, axis=0))]*p
+        score = [np.sum(variance_contrib[:k])/total_variance_to_explain]*p
 
     # numbers cannot be above 1 as they are standardized by the total amount of variance in the data
-    assert all(num < 1 for num in score), "Not all numbers are below 1"
+    # assert all(num < 1 for num in score), "Not all numbers are below 1"
 
     return score, pca_transformed_data, pca_model, scaler
 

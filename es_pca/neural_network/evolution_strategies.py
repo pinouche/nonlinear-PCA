@@ -97,7 +97,8 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                if mini_batch_x.shape[0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                if mini_batch_x.shape[
+                    0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
                     self.update(mini_batch_x,
                                 sigma,
                                 learning_rate,
@@ -117,16 +118,18 @@ class Solution:
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, train=False)
-            objective_val, pca_transformed_val, pca_model, scaler = self.evaluate_model(x_transformed_val,
-                                                                                        partial_contribution_objective,
-                                                                                        num_components,
-                                                                                        False,
-                                                                                        False,
-                                                                                        run_index)
+            objective_val, pca_transformed_val, pca_model, scaler = self.evaluate_model(
+                x_transformed_val,
+                partial_contribution_objective,
+                num_components,
+                False,
+                False,
+                run_index)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
             if partial_contribution_objective:
+                # the standardizing is done on training data so the total var to explain is the number of variables
                 objective_train = np.sum(objective_train)
                 objective_val = np.sum(objective_val)
             else:

@@ -28,8 +28,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     x = load_data(args.dataset)
     x = x.dropna()
-    x, classes = preprocess_data(x, args.dataset)
-    classes, mapping = pd.factorize(classes)
+
+    classes = np.zeros(x.shape[0])
+
+    if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
+        x, classes = preprocess_data(x, args.dataset)
+        classes, mapping = pd.factorize(classes)
 
     logger.info(f"The column types of the dataset are: {x.dtypes}")
 
