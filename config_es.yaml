@@ -1,11 +1,11 @@
 hidden_layer_size: 64
 activation: "relu"
 n_hidden_layers: 2
-pop_size: 500
+pop_size: 1000
 sigma: 0.01
-learning_rate: 0.0005
-epochs: 50
-batch_size: 128
+learning_rate: 0.001
+epochs: 200
+batch_size: 64
 early_stopping_epochs: 1000
 alpha_reg_pca: 0.0
 pca_type: "regular"
