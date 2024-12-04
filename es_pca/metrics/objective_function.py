@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 import pickle
 import os
@@ -44,12 +43,12 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     return np.array(arr_contrib)
 
 
-def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
+def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
-    pca_path = "pca_model.pkl"
+    pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
     # Scale the input data
-    data = scale(data, axis=0)
+    # data = scale(data, axis=0)
 
     # Initialize the PCA model based on the type specified
     if pca_type == "sparse":
@@ -65,7 +64,7 @@ def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[
     if save_pca_model and training_mode:
         with open(pca_path, "wb") as file:
             pickle.dump(pca, file)
-        print(f"PCA model saved to {pca_path}")
+        # print(f"PCA model saved to {pca_path}")
 
     if not training_mode:
         # Load the PCA model from the saved file
@@ -74,14 +73,15 @@ def get_pca(data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[
 
         with open(pca_path, "rb") as file:
             pca = pickle.load(file)
-        print(f"PCA model loaded from {pca_path}")
+        # print(f"PCA model loaded from {pca_path}")
 
     pca_transformed_data = pca.transform(data)
 
     return pca, pca_transformed_data
 
 
-def compute_fitness(data_transformed: np.array,
+def compute_fitness(run_index: int,
+                    data_transformed: np.array,
                     training_mode: bool = True,
                     partial_contribution_objective: bool = False,
                     k: int = 1,
@@ -90,14 +90,14 @@ def compute_fitness(data_transformed: np.array,
     if CONFIG["remove_outliers"] and training_mode:
         data_transformed = remove_outliers(data_transformed)
 
-    scaler_path = "scaler_model.pkl"
+    scaler_path = f"tmp_files/scaler_model_{run_index}.pkl"
     scaler = StandardScaler()
     scaler.fit(data_transformed)
 
     if save_pca_model and training_mode:
         with open(scaler_path, "wb") as file:
             pickle.dump(scaler, file)
-        print(f"PCA model saved to {scaler_path}")
+        # print(f"PCA model saved to {scaler_path}")
 
     if not training_mode:
         # Load the PCA model from the saved file
@@ -106,24 +106,32 @@ def compute_fitness(data_transformed: np.array,
 
         with open(scaler_path, "rb") as file:
             scaler = pickle.load(file)
-        print(f"PCA model loaded from {scaler_path}")
+        # print(f"PCA model loaded from {scaler_path}")
 
     data_transformed = scaler.transform(data_transformed)
 
-    pca_model, pca_transformed_data = get_pca(data_transformed, training_mode, save_pca_model)
+    pca_model, pca_transformed_data = get_pca(run_index,
+                                              data_transformed,
+                                              training_mode,
+                                              save_pca_model)
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 
     variance_contrib = get_contribs(cov_matrix, pca_model.components_, p)
 
+    total_variance_to_explain = np.sum(np.var(data_transformed, axis=0))
+
     if partial_contribution_objective:
         # this is using our novel objective function (breaking down the variance contribution per variable)
-        score = np.sum(variance_contrib[:k], axis=0)
+        score = np.sum(variance_contrib[:k], axis=0)/total_variance_to_explain
     else:
         # this is the regular PCA total explained variance
-        score = [np.sum(variance_contrib[:k])]*p
+        score = [np.sum(variance_contrib[:k])/total_variance_to_explain]*p
 
-    return score, pca_transformed_data
+    # numbers cannot be above 1 as they are standardized by the total amount of variance in the data
+    # assert all(num < 1 for num in score), "Not all numbers are below 1"
+
+    return score, pca_transformed_data, pca_model, scaler
 
 
 
