@@ -24,6 +24,14 @@ def dataset_config_load(file_path: str, args: argparse.Namespace) -> ConfigDatas
     return ConfigDataset(**config_data)
 
 
+def remove_files_from_dir(path: str) -> None:
+    # Remove all files in the directory
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+
 def read_arff(path):
     data, meta = arff.loadarff(path)
     data = pd.DataFrame(data)
@@ -70,7 +78,7 @@ def create_scatter_plot(data_transformed: tuple[np.array, np.array],
         ax = axes[i]
         ax.grid(True)
         ax.scatter(data[0][:, 0], data[0][:, 1], c=classes[0], s=20, edgecolor="k", alpha=0.5, label="Training data")
-        # ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
+        ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)
@@ -126,17 +134,35 @@ def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tupl
     return data, num_cols_per_categories
 
 
+def compute_last_layer_weights(previous_layer_weights: np.array) -> np.array:
+    """
+    Compute the last layer weight matrix that reconstructs the input.
+    """
+    # Compute the pseudoinverse of the previous layer's weights
+    # This ensures we can exactly reconstruct the input
+    last_layer_weights = np.linalg.pinv(previous_layer_weights)
+
+    return last_layer_weights
+
+
 def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):
     layers_list = list()
 
-    layers_list.append(ForwardLayer(n_features, hidden_size, activation))
+    layers_list.append(ForwardLayer(n_features, hidden_size, activation=activation))
     layers_list.append(BatchNormLayer(hidden_size))
 
     for _ in range(n_layers - 1):
-        layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
+        layers_list.append(ForwardLayer(hidden_size, hidden_size, activation=activation))
         layers_list.append(BatchNormLayer(hidden_size))
 
-    layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
+    # init last layer as identity (use -2 because -1 is batch_norm)
+    penultimate_weight_matrix = layers_list[-2].weights
+    last_weight_matrix = compute_last_layer_weights(penultimate_weight_matrix)
+    print(last_weight_matrix.shape)
+    layers_list.append(ForwardLayer(input_dim=hidden_size,
+                                    output_dim=1,
+                                    weights=last_weight_matrix,
+                                    activation='identity'))
 
     return layers_list
 

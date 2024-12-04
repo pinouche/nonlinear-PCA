@@ -1,6 +1,8 @@
 import numpy as np
 import copy
-from typing import List, Tuple
+from typing import List, Any
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 from es_pca.metrics.objective_function import compute_fitness
 from es_pca.neural_network.neural_network import NeuralNetwork
@@ -14,7 +16,7 @@ class Solution:
         self.networks = network_list
 
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int,
-               partial_contribution_objective: bool, num_components: int) -> None:
+               partial_contribution_objective: bool, num_components: int, run_index: int) -> None:
 
         dict_weighted_noise = {}
 
@@ -24,8 +26,14 @@ class Solution:
             list_noise = [net.get_noise_network() for net in self.networks]
             x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
-            f_obj, _ = self.evaluate_model(x_transformed, partial_contribution_objective, num_components, True, False)
-            assert len(f_obj) == len(list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
+            f_obj, _, _, _ = self.evaluate_model(x_transformed,
+                                                 partial_contribution_objective,
+                                                 num_components,
+                                                 True,
+                                                 False,
+                                                 run_index)
+            assert len(f_obj) == len(
+                list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
 
             weighted_noise = [
                 [
@@ -45,34 +53,42 @@ class Solution:
                     layer = network[layer_id]
                     if layer_id not in dict_weighted_noise[f"network_id_{network_i}"]:
                         dict_weighted_noise[f"network_id_{network_i}"][layer_id] = []
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[0]*obj)  # for weights
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[1]*obj)  # for biases
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[0] * obj)  # for weights
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[1] * obj)  # for biases
                     else:
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][0] += layer[0]*obj
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][1] += layer[1]*obj
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][0] += layer[0] * obj
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][1] += layer[1] * obj
 
         # divide the values by the population size and multiply by (lr/sigma) to compute the update_step
         for outer_key, inner_dict in dict_weighted_noise.items():
             for key, value in inner_dict.items():
-                dict_weighted_noise[outer_key][key][0] = (value[0] / pop_size)*(lr/sigma)
-                dict_weighted_noise[outer_key][key][1] = (value[1] / pop_size)*(lr/sigma)
+                dict_weighted_noise[outer_key][key][0] = (value[0] / pop_size) * (lr / sigma)
+                dict_weighted_noise[outer_key][key][1] = (value[1] / pop_size) * (lr / sigma)
 
         # if partial_contribution_objective:
         self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
                          for i in range(len(self.networks))]
 
-    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float, learning_rate: float, pop_size: int,
-            partial_contribution_objective: bool, num_components: int, epochs: int, batch_size: int, early_stopping: int,
-            verbose: bool = False) -> Tuple:
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float,
+            learning_rate: float, pop_size: int,
+            partial_contribution_objective: bool,
+            num_components: int,
+            epochs: int,
+            batch_size: int,
+            early_stopping: int,
+            train_indices: np.array,
+            val_indices: np.array,
+            run_index: int,
+            verbose: bool = False) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
 
-        objective_list = []
+        result_list = []
         num_examples = x_train.shape[0]
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
 
         best_objective_val = 0
         early_stopping_iterations = 0
-        x_transformed_train, x_transformed_val = None, None
-        pca_transformed_val, pca_transformed_train = None, None
+        # x_transformed_train, x_transformed_val = None, None
+        # pca_transformed_val, pca_transformed_train = None, None
 
         for epoch in range(epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
@@ -81,35 +97,47 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                if mini_batch_x.shape[0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
-                    self.update(mini_batch_x, sigma, learning_rate, pop_size, partial_contribution_objective, num_components)
+                if mini_batch_x.shape[
+                    0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                    self.update(mini_batch_x,
+                                sigma,
+                                learning_rate,
+                                pop_size,
+                                partial_contribution_objective,
+                                num_components,
+                                run_index)
 
             # evaluate objective at the end of the epoch on the training set.
             x_transformed_train = self.predict(x_train, train=True)
-            objective_train, pca_transformed_train = self.evaluate_model(x_transformed_train,
-                                                                         partial_contribution_objective,
-                                                                         num_components,
-                                                                         True,
-                                                                         True)
+            objective_train, pca_transformed_train, pca_model, scaler = self.evaluate_model(x_transformed_train,
+                                                                                            partial_contribution_objective,
+                                                                                            num_components,
+                                                                                            True,
+                                                                                            True,
+                                                                                            run_index)
 
             # evaluate objective at the end of the epoch on the validation set
             x_transformed_val = self.predict(x_val, train=False)
-            objective_val, pca_transformed_val = self.evaluate_model(x_transformed_val,
-                                                                     partial_contribution_objective,
-                                                                     num_components,
-                                                                     False,
-                                                                     False)
+            objective_val, pca_transformed_val, pca_model, scaler = self.evaluate_model(
+                x_transformed_val,
+                partial_contribution_objective,
+                num_components,
+                False,
+                False,
+                run_index)
 
             # for partial contribution = True, each element is the explained variance for each variable.
             # for partial contribution = False, each element of the list is the (duplicated) total variance -> do not sum.
             if partial_contribution_objective:
+                # the standardizing is done on training data so the total var to explain is the number of variables
                 objective_train = np.sum(objective_train)
                 objective_val = np.sum(objective_val)
             else:
                 objective_train = objective_train[0]
                 objective_val = objective_val[0]
 
-            objective_list.append((objective_train, objective_val))
+            result_list.append([(pca_model, scaler, train_indices, val_indices),
+                                (objective_train, objective_val)])
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
             # implement early stopping
@@ -122,12 +150,11 @@ class Solution:
                     break
 
             if verbose and epoch % 1 == 0:
-
                 self.plot((x_transformed_train, x_transformed_val),
                           (pca_transformed_train, pca_transformed_val),
                           classes)
 
-        return objective_list, (x_transformed_train, x_transformed_val, pca_transformed_train, pca_transformed_val)
+        return result_list
 
     def plot(self, x_transformed: tuple[np.array, np.array],
              pca_transformed: tuple[np.array, np.array],
@@ -158,13 +185,14 @@ class Solution:
                        partial_contribution_objective: bool,
                        num_components: int,
                        training_mode: bool,
-                       save_pca_model: bool) -> tuple[list[float], np.array]:
+                       save_pca_model: bool,
+                       run_index: int) -> tuple[list[float], np.array, PCA, StandardScaler]:
 
-        objective_value, pca_transformed = compute_fitness(x_transformed,
-                                                           training_mode,
-                                                           partial_contribution_objective,
-                                                           num_components,
-                                                           save_pca_model)
+        score, pca_transformed_data, pca_model, scaler = compute_fitness(run_index,
+                                                                         x_transformed,
+                                                                         training_mode,
+                                                                         partial_contribution_objective,
+                                                                         num_components,
+                                                                         save_pca_model)
 
-        return objective_value, pca_transformed
-
+        return score, pca_transformed_data, pca_model, scaler

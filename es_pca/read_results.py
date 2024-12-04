@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     results_dic = {}
     if dataset in ["spheres", "circles", "alternate_stripes"]:
-        base_path = f"./results/synthetic_data/{dataset}/"
+        base_path = f"./results/datasets/synthetic_data/{dataset}/"
         for activation in ["cos", "relu"]:
             for partial_contrib in ["False", "True"]:
                 list_runs = []

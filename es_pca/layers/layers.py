@@ -42,10 +42,21 @@ class Layer(ABC):
 
 class ForwardLayer(Layer):
 
-    def __init__(self, input_dim: int, output_dim: int, activation: str = 'leaky_relu'):
+    def __init__(self, input_dim: int,
+                 output_dim: int,
+                 weights: np.array = None,
+                 biases: np.array = None,
+                 activation: str = 'leaky_relu'):
+
         self.activation_fn = NonLinearities(activation)
-        self.weights = np.random.randn(input_dim, output_dim)
-        self.biases = np.zeros((1, output_dim))
+        self.weights = weights
+        self.biases = biases
+
+        if weights is None:
+            self.weights = np.random.randn(input_dim, output_dim)
+
+        if biases is None:
+            self.biases = np.zeros((1, output_dim))
 
     def set_weights(self, params: Tuple) -> None:
         self.weights, self.biases = params

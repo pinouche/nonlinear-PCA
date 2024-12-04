@@ -3,11 +3,12 @@ import warnings
 import os
 from loguru import logger
 import argparse
+import multiprocessing
 
 import pandas as pd
 import numpy as np
 
-from utils import load_data
+from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import (get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load,
@@ -18,7 +19,6 @@ warnings.filterwarnings("ignore")
 
 
 def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
-
     if args.partial_contrib == "false":
         partial_contrib = False
     elif args.partial_contrib == "true":
@@ -28,8 +28,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     x = load_data(args.dataset)
     x = x.dropna()
-    x, classes = preprocess_data(x, args.dataset)
-    classes, mapping = pd.factorize(classes)
+
+    classes = np.zeros(x.shape[0])
+
+    if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
+        x, classes = preprocess_data(x, args.dataset)
+        classes, mapping = pd.factorize(classes)
 
     logger.info(f"The column types of the dataset are: {x.dtypes}")
 
@@ -41,8 +45,6 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
-
-    print(train_indices.shape, val_indices.shape)
 
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
@@ -59,38 +61,68 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                 f"partial_contrib={partial_contrib}, "
                 f"activation_function={args.activation}")
 
-    obj_list, x_transformed = solution.fit(train_x,
-                                           val_x,
-                                           y,
-                                           config_es["sigma"],
-                                           config_es["learning_rate"],
-                                           config_es["pop_size"],
-                                           partial_contrib,
-                                           config_es["num_components"],
-                                           config_es["epochs"],
-                                           config_es["batch_size"],
-                                           config_es["early_stopping_epochs"],
-                                           config_es["plot"],
-                                           )
+    results_list = solution.fit(train_x,
+                                val_x,
+                                y,
+                                config_es["sigma"],
+                                config_es["learning_rate"],
+                                config_es["pop_size"],
+                                partial_contrib,
+                                config_es["num_components"],
+                                config_es["epochs"],
+                                config_es["batch_size"],
+                                config_es["early_stopping_epochs"],
+                                train_indices,
+                                val_indices,
+                                run_index,
+                                config_es["plot"]
+                                )
 
-    saving_path = f"results/{args.dataset}/activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p"
+    dataset_folder = "real_world_data"
+    if args.dataset in ["circles", "spheres", "alternate_stripes"]:
+        dataset_folder = "synthetic_data"
+
+    saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                   f"activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))
 
-    pickle.dump((obj_list, x_transformed), open(saving_path, "wb"))
+    pickle.dump(results_list, open(saving_path, "wb"))
+
+
+def run_single_iteration(args: argparse.Namespace):
+    """
+    Wrapper function to unpack arguments for multiprocessing
+    """
+    evo_config, data_config, arguments, index = args
+    main(evo_config, data_config, arguments, index)
 
 
 if __name__ == "__main__":
 
-    # this is the config for the evolution strategies run
+    # make sure this temp dir is empty (with no artifacts from the run on the previous dataset)
+    tmp_path = "./tmp_files/"
+    if not os.path.exists(tmp_path):
+        os.makedirs(tmp_path)
+    remove_files_from_dir(tmp_path)
+
+    # Load configurations
     config_evo = config_load()
     args = parse_arguments()
-
-    # this is the config for the datasets specifications
     config_data = dataset_config_load("./datasets_config.yaml", args)
 
+    # Get number of runs
     number_of_runs = config_evo["number_of_runs"]
 
-    for i in range(number_of_runs):
-        main(config_evo, config_data, args, i)
+    # Determine the number of processes (you can adjust this)
+    num_processes = min(multiprocessing.cpu_count(), number_of_runs)
+
+    # Prepare arguments for each run
+    run_args = [
+        (config_evo, config_data, args, i) for i in range(number_of_runs)
+    ]
+
+    # Use multiprocessing Pool to run iterations in parallel
+    with multiprocessing.Pool(processes=num_processes) as pool:
+        pool.map(run_single_iteration, run_args)
