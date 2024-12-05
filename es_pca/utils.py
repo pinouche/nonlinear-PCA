@@ -24,6 +24,14 @@ def dataset_config_load(file_path: str, args: argparse.Namespace) -> ConfigDatas
     return ConfigDataset(**config_data)
 
 
+def remove_files_from_dir(path: str) -> None:
+    # Remove all files in the directory
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+
 def read_arff(path):
     data, meta = arff.loadarff(path)
     data = pd.DataFrame(data)
@@ -70,7 +78,7 @@ def create_scatter_plot(data_transformed: tuple[np.array, np.array],
         ax = axes[i]
         ax.grid(True)
         ax.scatter(data[0][:, 0], data[0][:, 1], c=classes[0], s=20, edgecolor="k", alpha=0.5, label="Training data")
-        # ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
+        ax.scatter(data[1][:, 0], data[1][:, 1], c=classes[1], s=20, edgecolor="k", label="Validation data")
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.tick_params(axis='both', which='major', labelsize=14)
