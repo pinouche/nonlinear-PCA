@@ -138,11 +138,11 @@ def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="l
     layers_list = list()
 
     layers_list.append(ForwardLayer(n_features, hidden_size, activation))
-    layers_list.append(BatchNormLayer(hidden_size))
+    # layers_list.append(BatchNormLayer(hidden_size))
 
     for _ in range(n_layers - 1):
         layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
-        layers_list.append(BatchNormLayer(hidden_size))
+        # layers_list.append(BatchNormLayer(hidden_size))
 
     layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
 

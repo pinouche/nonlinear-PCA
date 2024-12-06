@@ -47,9 +47,6 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
     pca_type = CONFIG["pca_type"]
     pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
-    # Scale the input data
-    # data = scale(data, axis=0)
-
     # Initialize the PCA model based on the type specified
     if pca_type == "sparse":
         pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG["alpha_reg_pca"])
@@ -58,22 +55,18 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
     else:
         raise ValueError(f"Invalid pca_type: {pca_type}. Expected one of ['sparse', 'regular'].")
 
-    # Fit PCA and save the model using pickle
     pca.fit(data)
 
     if save_pca_model and training_mode:
         with open(pca_path, "wb") as file:
             pickle.dump(pca, file)
-        # print(f"PCA model saved to {pca_path}")
 
     if not training_mode:
-        # Load the PCA model from the saved file
         if not os.path.exists(pca_path):
             raise FileNotFoundError(f"PCA model file '{pca_path}' not found.")
 
         with open(pca_path, "rb") as file:
             pca = pickle.load(file)
-        # print(f"PCA model loaded from {pca_path}")
 
     pca_transformed_data = pca.transform(data)
 
@@ -97,16 +90,13 @@ def compute_fitness(run_index: int,
     if save_pca_model and training_mode:
         with open(scaler_path, "wb") as file:
             pickle.dump(scaler, file)
-        # print(f"PCA model saved to {scaler_path}")
 
     if not training_mode:
-        # Load the PCA model from the saved file
         if not os.path.exists(scaler_path):
             raise FileNotFoundError(f"PCA model file '{scaler_path}' not found.")
 
         with open(scaler_path, "rb") as file:
             scaler = pickle.load(file)
-        # print(f"PCA model loaded from {scaler_path}")
 
     data_transformed = scaler.transform(data_transformed)
 
