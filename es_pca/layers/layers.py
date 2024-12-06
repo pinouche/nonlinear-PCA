@@ -49,6 +49,8 @@ class ForwardLayer(Layer):
             self.weights = np.random.randn(input_dim, output_dim)
         elif init_mode == "identity":
             self.weights = create_rectangular_identity(input_dim, output_dim)
+        else:
+            raise ValueError(f"The init_mode {init_mode} is not accepted.")
 
         self.biases = np.zeros((1, output_dim))
 

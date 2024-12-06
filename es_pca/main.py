@@ -50,13 +50,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
 
-
     # Instantiate Solution object
     list_neural_networks = [NeuralNetwork(create_network(n_features,
                                                          config_es["n_hidden_layers"],
                                                          config_es["hidden_layer_size"],
                                                          args.activation,
-                                                         "identity")) for n_features in
+                                                         config_es["init_mode"])) for n_features in
                             num_features_per_network]
 
     solution = Solution(list_neural_networks)

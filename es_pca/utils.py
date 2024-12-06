@@ -117,14 +117,29 @@ def convert_dic_to_list(dictionary: dict) -> list:
     return result
 
 
-def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list[int]]:
+# def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list[int]]:
+#     object_indices = np.array(object_indices)
+#     columns = data.columns[object_indices]
+#
+#     for col in columns:
+#         data[col], _ = pd.factorize(data[col])
+#
+#     num_cols_per_categories = [1] * data.shape[1]
+#
+#     return data, num_cols_per_categories
+
+def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list]:
     object_indices = np.array(object_indices)
-    columns = data.columns[object_indices]
+    data_to_one_hot = data.iloc[:, object_indices]
 
-    for col in columns:
-        data[col], _ = pd.factorize(data[col])
+    num_cols_per_categories = list(data_to_one_hot.nunique())
+    cols_to_remove = data_to_one_hot.columns
 
-    num_cols_per_categories = [1] * data.shape[1]
+    data_to_one_hot = pd.get_dummies(data_to_one_hot, columns=cols_to_remove, dtype=int)
+
+    data = data.drop(columns=cols_to_remove, inplace=False)
+    num_cols_per_categories = num_cols_per_categories + [1] * data.shape[1]
+    data = pd.concat((data_to_one_hot, data), axis=1)
 
     return data, num_cols_per_categories
 
