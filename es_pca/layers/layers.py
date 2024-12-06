@@ -42,9 +42,14 @@ class Layer(ABC):
 
 class ForwardLayer(Layer):
 
-    def __init__(self, input_dim: int, output_dim: int, activation: str = 'leaky_relu'):
+    def __init__(self, input_dim: int, output_dim: int, activation: str = 'leaky_relu', init_mode: str = "normal"):
         self.activation_fn = NonLinearities(activation)
-        self.weights = np.random.randn(input_dim, output_dim)
+
+        if init_mode == "normal":
+            self.weights = np.random.randn(input_dim, output_dim)
+        elif init_mode == "identity":
+            self.weights = create_rectangular_identity(input_dim, output_dim)
+
         self.biases = np.zeros((1, output_dim))
 
     def set_weights(self, params: Tuple) -> None:
@@ -147,3 +152,14 @@ class BatchNormLayer(Layer):
 
     def get_layer_weights(self) -> Tuple:
         return np.array([0]), np.array([0])
+
+
+def create_rectangular_identity(p: int, h: int) -> np.array:
+
+    if h == 1:
+        result = np.ones((p, h), dtype=float)
+    else:
+        result = np.zeros((p, h), dtype=float)
+        result[:p, :p] = np.eye(p)
+
+    return result

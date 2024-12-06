@@ -11,9 +11,10 @@ import numpy as np
 from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import (get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load,
+from es_pca.utils import (get_split_indices, transform_data_onehot, parse_arguments, config_load,
                           dataset_config_load, preprocess_data)
 from es_pca.data_models.data_models import ConfigDataset
+from es_pca.layers.init_weights_layers import create_network
 
 warnings.filterwarnings("ignore")
 
@@ -49,12 +50,15 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
 
+
     # Instantiate Solution object
     list_neural_networks = [NeuralNetwork(create_network(n_features,
                                                          config_es["n_hidden_layers"],
                                                          config_es["hidden_layer_size"],
-                                                         args.activation)) for n_features in
+                                                         args.activation,
+                                                         "identity")) for n_features in
                             num_features_per_network]
+
     solution = Solution(list_neural_networks)
 
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
