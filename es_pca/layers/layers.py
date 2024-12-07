@@ -46,7 +46,7 @@ class ForwardLayer(Layer):
         self.activation_fn = NonLinearities(activation)
 
         if init_mode == "normal":
-            self.weights = np.random.normal(loc=0, scale=0.1, size=(input_dim, output_dim))
+            self.weights = np.random.randn(input_dim, output_dim) * np.sqrt(2.0 / input_dim)
         elif init_mode == "identity":
             self.weights = create_rectangular_identity(input_dim, output_dim)
         else:

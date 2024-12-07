@@ -4,7 +4,7 @@ import os
 
 from typing import Union, Any
 from sklearn.decomposition import SparsePCA, PCA
-from sklearn.preprocessing import scale, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from es_pca.utils import config_load, remove_outliers
 
@@ -46,9 +46,6 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
 def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
     pca_type = CONFIG["pca_type"]
     pca_path = f"tmp_files/pca_model_{run_index}.pkl"
-
-    # Scale the input data
-    # data = scale(data, axis=0)
 
     # Initialize the PCA model based on the type specified
     if pca_type == "sparse":

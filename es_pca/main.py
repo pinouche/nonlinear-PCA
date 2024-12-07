@@ -46,12 +46,10 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     else:
         num_features_per_network = np.array([1] * x.shape[1])
 
-    x = scale(x, axis=0)
-
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
 
-    train_x, val_x = x[train_indices], x[val_indices]
+    train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
     y = classes[train_indices], classes[val_indices]
 
     # Instantiate Solution object

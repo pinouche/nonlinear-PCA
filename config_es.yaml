@@ -3,7 +3,7 @@ activation: "relu"
 init_mode: "normal"
 n_hidden_layers: 2
 pop_size: 500
-sigma: 0.001
+sigma: 0.01
 learning_rate: 0.01
 epochs: 200
 batch_size: 128
