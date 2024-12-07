@@ -1,12 +1,14 @@
 import pickle
 import warnings
 import os
+
 from loguru import logger
 import argparse
 import multiprocessing
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import scale
 
 from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
@@ -44,10 +46,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     else:
         num_features_per_network = np.array([1] * x.shape[1])
 
+    x = scale(x, axis=0)
+
     # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
 
-    train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
+    train_x, val_x = x[train_indices], x[val_indices]
     y = classes[train_indices], classes[val_indices]
 
     # Instantiate Solution object
@@ -62,6 +66,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
                 f"partial_contrib={partial_contrib}, "
+                f"init_mode={config_es['init_mode']}, "
                 f"activation_function={args.activation}")
 
     results_list = solution.fit(train_x,
