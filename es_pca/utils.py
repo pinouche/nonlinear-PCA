@@ -10,7 +10,6 @@ import yaml
 
 from typing import Tuple
 
-from es_pca.layers.layers import ForwardLayer, BatchNormLayer
 from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
 from es_pca.data_models.data_models import ConfigDataset
 
@@ -118,42 +117,32 @@ def convert_dic_to_list(dictionary: dict) -> list:
     return result
 
 
-def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list]:
+def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list[int]]:
     object_indices = np.array(object_indices)
-    data_to_one_hot = data.iloc[:, object_indices]
+    columns = data.columns[object_indices]
 
-    num_cols_per_categories = list(data_to_one_hot.nunique())
-    cols_to_remove = data_to_one_hot.columns
+    for col in columns:
+        data[col], _ = pd.factorize(data[col])
 
-    data_to_one_hot = pd.get_dummies(data_to_one_hot, columns=cols_to_remove, dtype=int)
-
-    data = data.drop(columns=cols_to_remove, inplace=False)
-    num_cols_per_categories = num_cols_per_categories + [1] * data.shape[1]
-    data = pd.concat((data_to_one_hot, data), axis=1)
+    num_cols_per_categories = [1] * data.shape[1]
 
     return data, num_cols_per_categories
 
 
-def create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation="leaky_relu"):
-    layers_list = list()
-
-    layers_list.append(ForwardLayer(n_features, hidden_size, activation))
-    layers_list.append(BatchNormLayer(hidden_size))
-
-    for _ in range(n_layers - 1):
-        layers_list.append(ForwardLayer(hidden_size, hidden_size, activation))
-        layers_list.append(BatchNormLayer(hidden_size))
-
-    layers_list.append(ForwardLayer(hidden_size, 1, 'identity'))
-
-    return layers_list
-
-
-def create_network(n_features, n_layers, hidden_size, activation="leaky_relu"):
-
-    layers_list = create_nn_for_numerical_col(n_features, n_layers, hidden_size, activation=activation)
-
-    return layers_list
+# def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tuple[pd.DataFrame, list]:
+#     object_indices = np.array(object_indices)
+#     data_to_one_hot = data.iloc[:, object_indices]
+#
+#     num_cols_per_categories = list(data_to_one_hot.nunique())
+#     cols_to_remove = data_to_one_hot.columns
+#
+#     data_to_one_hot = pd.get_dummies(data_to_one_hot, columns=cols_to_remove, dtype=int)
+#
+#     data = data.drop(columns=cols_to_remove, inplace=False)
+#     num_cols_per_categories = num_cols_per_categories + [1] * data.shape[1]
+#     data = pd.concat((data_to_one_hot, data), axis=1)
+#
+#     return data, num_cols_per_categories
 
 
 def config_load() -> dict:

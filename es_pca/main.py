@@ -1,6 +1,7 @@
 import pickle
 import warnings
 import os
+
 from loguru import logger
 import argparse
 import multiprocessing
@@ -11,9 +12,10 @@ import numpy as np
 from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
-from es_pca.utils import (get_split_indices, transform_data_onehot, create_network, parse_arguments, config_load,
+from es_pca.utils import (get_split_indices, transform_data_onehot, parse_arguments, config_load,
                           dataset_config_load, preprocess_data)
 from es_pca.data_models.data_models import ConfigDataset
+from es_pca.layers.init_weights_layers import create_network
 
 warnings.filterwarnings("ignore")
 
@@ -53,12 +55,15 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     list_neural_networks = [NeuralNetwork(create_network(n_features,
                                                          config_es["n_hidden_layers"],
                                                          config_es["hidden_layer_size"],
-                                                         args.activation)) for n_features in
+                                                         args.activation,
+                                                         config_es["init_mode"])) for n_features in
                             num_features_per_network]
+
     solution = Solution(list_neural_networks)
 
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
                 f"partial_contrib={partial_contrib}, "
+                f"init_mode={config_es['init_mode']}, "
                 f"activation_function={args.activation}")
 
     results_list = solution.fit(train_x,
