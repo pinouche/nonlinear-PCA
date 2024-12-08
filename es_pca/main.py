@@ -8,7 +8,6 @@ import multiprocessing
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import scale
 
 from utils import load_data, remove_files_from_dir
 from es_pca.neural_network.neural_network import NeuralNetwork
