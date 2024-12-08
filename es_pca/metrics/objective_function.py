@@ -4,7 +4,7 @@ import os
 
 from typing import Union, Any
 from sklearn.decomposition import SparsePCA, PCA
-from sklearn.preprocessing import scale, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from es_pca.utils import config_load, remove_outliers
 
