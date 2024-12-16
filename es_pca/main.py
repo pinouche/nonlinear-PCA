@@ -16,7 +16,7 @@ from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import (get_split_indices, transform_data_onehot, parse_arguments, config_load,
                           dataset_config_load, preprocess_data)
 from es_pca.data_models.data_models import ConfigDataset
-from es_pca.layers.init_weights_layers import create_network
+from es_pca.layers.init_weights_layers import create_nn_for_numerical_col
 
 warnings.filterwarnings("ignore")
 
@@ -53,7 +53,6 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     val_x = x.iloc[val_indices].values
 
     if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
-
         scaler = StandardScaler()
         scaler.fit(x.iloc[train_indices])
         train_x = scaler.transform(train_x)
@@ -62,11 +61,12 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     y = classes[train_indices], classes[val_indices]
 
     # Instantiate Solution object
-    list_neural_networks = [NeuralNetwork(create_network(n_features,
-                                                         config_es["n_hidden_layers"],
-                                                         config_es["hidden_layer_size"],
-                                                         args.activation,
-                                                         config_es["init_mode"])) for n_features in
+    list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
+                                                                      config_es["n_hidden_layers"],
+                                                                      config_es["hidden_layer_size"],
+                                                                      config_es["batch_norm"],
+                                                                      args.activation,
+                                                                      config_es["init_mode"])) for n_features in
                             num_features_per_network]
 
     solution = Solution(list_neural_networks)
@@ -74,6 +74,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
                 f"partial_contrib={partial_contrib}, "
                 f"init_mode={config_es['init_mode']}, "
+                f"batch_norm={config_es['batch_norm']}, "
                 f"activation_function={args.activation}")
 
     results_list = solution.fit(train_x,
@@ -98,7 +99,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
         dataset_folder = "synthetic_data"
 
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
-                   f"activation={args.activation}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
+                   f"activation={args.activation}/{config_es['batch_norm']}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))
