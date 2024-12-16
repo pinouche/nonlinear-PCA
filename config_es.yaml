@@ -2,10 +2,10 @@ hidden_layer_size: 64
 activation: "relu"
 init_mode: "normal"
 n_hidden_layers: 2
-pop_size: 500
+pop_size: 100
 sigma: 0.01
 learning_rate: 0.01
-epochs: 200
+epochs: 300
 batch_size: 128
 early_stopping_epochs: 1000
 alpha_reg_pca: 0.0
@@ -13,9 +13,9 @@ pca_type: "regular"
 partial_contribution_objective: "true"
 num_components: 1
 dataset: "circles"
-number_of_runs: 30
+number_of_runs: 1
 remove_outliers: "false"
-n_outliers: 5
+n_outliers: 15
 plot: false
 val_prop: 0.25
 

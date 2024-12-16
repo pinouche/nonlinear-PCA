@@ -1,5 +1,5 @@
 # Define the arrays for datasets, partial_contribution_objective values, and activation values
-datasets=("spheres")
+datasets=("wine")
 partial_contrib_values=("true" "false")
 activation_values=("relu")
 

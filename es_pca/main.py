@@ -1,6 +1,7 @@
 import pickle
 import warnings
 import os
+from sklearn.preprocessing import StandardScaler
 
 from loguru import logger
 import argparse
@@ -39,16 +40,25 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     logger.info(f"The column types of the dataset are: {x.dtypes}")
 
-    # transform categorical (object type in pandas) columns to one-hot encoded.
+    # transform categorical columns to one-hot encoded.
     if dataset_config.categorical_features:
-        x, num_features_per_network = transform_data_onehot(x, dataset_config.categorical_features)
+        x, num_features_per_network = transform_data_onehot(x,
+                                                            dataset_config.categorical_features
+                                                            )
     else:
         num_features_per_network = np.array([1] * x.shape[1])
 
-    # split train and validation
     train_indices, val_indices = get_split_indices(x, run_index)
+    train_x = x.iloc[train_indices].values
+    val_x = x.iloc[val_indices].values
 
-    train_x, val_x = np.array(x.iloc[train_indices]), np.array(x.iloc[val_indices])
+    if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
+
+        scaler = StandardScaler()
+        scaler.fit(x.iloc[train_indices])
+        train_x = scaler.transform(train_x)
+        val_x = scaler.transform(val_x)
+
     y = classes[train_indices], classes[val_indices]
 
     # Instantiate Solution object
