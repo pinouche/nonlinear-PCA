@@ -64,7 +64,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
                                                                       config_es["n_hidden_layers"],
                                                                       config_es["hidden_layer_size"],
-                                                                      config_es["batch_norm"],
+                                                                      args.batch_norm,
                                                                       args.activation,
                                                                       config_es["init_mode"])) for n_features in
                             num_features_per_network]
@@ -74,7 +74,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
                 f"partial_contrib={partial_contrib}, "
                 f"init_mode={config_es['init_mode']}, "
-                f"batch_norm={config_es['batch_norm']}, "
+                f"batch_norm={args.batch_norm}, "
                 f"activation_function={args.activation}")
 
     results_list = solution.fit(train_x,
@@ -99,7 +99,9 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
         dataset_folder = "synthetic_data"
 
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
-                   f"activation={args.activation}/{config_es['batch_norm']}/partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
+                   f"activation={args.activation}/{config_es['init_mode']}/"
+                   f"batch_norm={args.batch_norm}/"
+                   f"partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))

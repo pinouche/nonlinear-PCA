@@ -1,14 +1,17 @@
-# Define the arrays for datasets, partial_contribution_objective values, and activation values
-datasets=("circles")
+# Define the arrays for datasets, partial_contribution_objective values, activation values, and batch normalization values
+datasets=("heart-statlog")
 partial_contrib_values=("true" "false")
 activation_values=("relu")
+batch_norm_values=("true" "false")
 
-# Loop over each combination of dataset, partial_contrib, and activation
+# Loop over each combination of dataset, partial_contrib, activation, and batch_norm
 for dataset in "${datasets[@]}"; do
   for partial_contrib in "${partial_contrib_values[@]}"; do
     for activation in "${activation_values[@]}"; do
-      # Run the Python script with the current combination of arguments
-      python es_pca/main.py --dataset "$dataset" --partial_contrib "$partial_contrib" --activation "$activation"
+      for batch_norm in "${batch_norm_values[@]}"; do
+        # Run the Python script with the current combination of arguments
+        python es_pca/main.py --dataset "$dataset" --partial_contrib "$partial_contrib" --activation "$activation" --batch_norm "$batch_norm"
+      done
     done
   done
 done
