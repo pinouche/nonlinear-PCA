@@ -112,25 +112,6 @@ breast_cancer:
     - 9
   numerical_features:
   
-heart-statlog:
-  num_features: 14
-  synthetic_bool: false
-  categorical_features:
-    - 1
-    - 2
-    - 5
-    - 6
-    - 8
-    - 12
-    - 13
-  numerical_features:
-    - 0
-    - 3
-    - 4
-    - 7
-    - 9
-    - 10
-    - 11
   
 dermatology:
   num_features: 35
