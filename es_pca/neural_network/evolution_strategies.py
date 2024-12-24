@@ -97,8 +97,7 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                if mini_batch_x.shape[
-                    0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                if mini_batch_x.shape[0] > mini_batch_x.shape[1]:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
                     self.update(mini_batch_x,
                                 sigma,
                                 learning_rate,
@@ -169,7 +168,7 @@ class Solution:
             # here, we get the dimension of the inputs to know which variables of the dataset it corresponds to.
             input_dim = network.layers[0].weights.shape[0]  # we can ignore this "unresolved attribute"
 
-            perturbed_network = network
+            perturbed_network = copy.deepcopy(network)
             if list_noise:
                 perturbed_layers = network.perturb(list_noise[i], sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)

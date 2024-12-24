@@ -104,6 +104,7 @@ def compute_fitness(run_index: int,
                                               data_transformed,
                                               training_mode,
                                               save_pca_model)
+
     p = data_transformed.shape[1]
     cov_matrix = np.cov(np.transpose(data_transformed))
 
