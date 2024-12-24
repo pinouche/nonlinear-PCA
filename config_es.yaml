@@ -2,7 +2,7 @@ hidden_layer_size: 64
 activation: "relu"
 batch_norm: "false"
 init_mode: "normal"
-n_hidden_layers: 2
+n_hidden_layers: 1
 pop_size: 200
 sigma: 0.01
 learning_rate: 0.01
@@ -17,7 +17,7 @@ dataset: "circles"
 number_of_runs: 1
 remove_outliers: false
 n_outliers: 15
-plot: true
+plot: false
 val_prop: 0.25
 
 

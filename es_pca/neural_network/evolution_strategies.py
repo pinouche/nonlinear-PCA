@@ -97,7 +97,7 @@ class Solution:
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                if mini_batch_x.shape[0] > mini_batch_x.shape[1]:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                if mini_batch_x.shape[0] > x_train.shape[1]:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
                     self.update(mini_batch_x,
                                 sigma,
                                 learning_rate,
@@ -107,7 +107,7 @@ class Solution:
                                 run_index)
 
             # evaluate objective at the end of the epoch on the training set.
-            x_transformed_train = self.predict(x_train, train=True)
+            x_transformed_train = self.predict(x_train)
             objective_train, pca_transformed_train, pca_model, scaler = self.evaluate_model(x_transformed_train,
                                                                                             partial_contribution_objective,
                                                                                             num_components,
@@ -116,7 +116,7 @@ class Solution:
                                                                                             run_index)
 
             # evaluate objective at the end of the epoch on the validation set
-            x_transformed_val = self.predict(x_val, train=False)
+            x_transformed_val = self.predict(x_val)
             objective_val, pca_transformed_val, pca_model, scaler = self.evaluate_model(
                 x_transformed_val,
                 partial_contribution_objective,
