@@ -1,8 +1,8 @@
 # Define the arrays for datasets, partial_contribution_objective values, activation values, and batch normalization values
-datasets=("wine")
+datasets=("heart-statlog")
 partial_contrib_values=("true" "false")
 activation_values=("relu")
-batch_norm_values=("false")
+batch_norm_values=("true")
 
 # Loop over each combination of dataset, partial_contrib, activation, and batch_norm
 for dataset in "${datasets[@]}"; do

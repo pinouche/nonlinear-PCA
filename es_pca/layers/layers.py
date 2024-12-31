@@ -103,8 +103,6 @@ class BatchNormLayer(Layer):
 
     def __init__(self, dims: int) -> None:
 
-        print("BATCHNORM INITIALIZED")
-
         self.gamma = np.ones((1, dims), dtype="float32")
         self.bias = np.zeros((1, dims), dtype="float32")
 
