@@ -22,12 +22,6 @@ warnings.filterwarnings("ignore")
 
 
 def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
-    if args.partial_contrib == "false":
-        partial_contrib = False
-    elif args.partial_contrib == "true":
-        partial_contrib = True
-    else:
-        raise ValueError(f"Partial contrib should be in ['false', 'true'], got {args.partial_contrib}.")
 
     x = load_data(args.dataset)
     x = x.dropna()
@@ -72,7 +66,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     solution = Solution(list_neural_networks)
 
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
-                f"partial_contrib={partial_contrib}, "
+                f"partial_contrib={args.partial_contrib}, "
                 f"init_mode={config_es['init_mode']}, "
                 f"batch_norm={args.batch_norm}, "
                 f"activation_function={args.activation}")
@@ -83,7 +77,8 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                                 config_es["sigma"],
                                 config_es["learning_rate"],
                                 config_es["pop_size"],
-                                partial_contrib,
+                                args.partial_contrib,
+                                config_es["full_then_partial_objective"],
                                 config_es["num_components"],
                                 config_es["epochs"],
                                 config_es["batch_size"],
@@ -101,7 +96,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
                    f"activation={args.activation}/{config_es['init_mode']}/"
                    f"batch_norm={args.batch_norm}/"
-                   f"partial_contrib={str(partial_contrib)}/{str(run_index)}.p")
+                   f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))

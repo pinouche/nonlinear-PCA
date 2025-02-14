@@ -28,10 +28,3 @@ python3 es_pca/read_results.py --dataset <dataset>
 
 The column types of the dataset must be defined in the datasets_config.yaml file. Each categorical variable will then be
 automatically converted to one-hot and use the appropriate transformations.
-
-# Datasets to perform experiments on:
-
-- circles: done
-- spheres: (running)
-- wine: (to re-run on 500 epochs)
-- heart-statlog: done

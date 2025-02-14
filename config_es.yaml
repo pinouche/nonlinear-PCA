@@ -6,12 +6,13 @@ n_hidden_layers: 1
 pop_size: 200
 sigma: 0.01
 learning_rate: 0.01
-epochs: 500
+epochs: 5000
 batch_size: 128
-early_stopping_epochs: 500
+early_stopping_epochs: 5000
 alpha_reg_pca: 0.0
 pca_type: "regular"
-partial_contribution_objective: "true"
+partial_contribution_objective: false
+full_then_partial_objective: true
 num_components: 1
 dataset: "circles"
 number_of_runs: 15

@@ -72,6 +72,7 @@ class Solution:
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float,
             learning_rate: float, pop_size: int,
             partial_contribution_objective: bool,
+            switch_objective: bool,
             num_components: int,
             epochs: int,
             batch_size: int,
@@ -139,14 +140,15 @@ class Solution:
                                 (objective_train, objective_val)])
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
-            # implement early stopping
-            if objective_val > best_objective_val:
-                best_objective_val = objective_val
-                early_stopping_iterations = 0
-            else:
-                early_stopping_iterations += 1
-                if early_stopping_iterations >= early_stopping:
-                    break
+            # implement objective switching (can also be used for early stopping)
+            if switch_objective:
+                if objective_val > best_objective_val:
+                    best_objective_val = objective_val
+                    early_stopping_iterations = 0
+                else:
+                    early_stopping_iterations += 1
+                    if early_stopping_iterations >= early_stopping:
+                        partial_contribution_objective = True
 
             if verbose and epoch % 1 == 0:
                 self.plot((x_transformed_train, x_transformed_val),
