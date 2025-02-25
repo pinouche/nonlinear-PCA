@@ -1,6 +1,6 @@
 # Define the arrays for datasets, partial_contribution_objective values, activation values, and batch normalization values
-datasets=("spheres")
-partial_contrib_values=("true" "false")
+datasets=("german_credit")
+partial_contrib_values=("false")
 activation_values=("relu")
 batch_norm_values=("true")
 

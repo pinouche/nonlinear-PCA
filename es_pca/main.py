@@ -2,6 +2,8 @@ import pickle
 import warnings
 import os
 from sklearn.preprocessing import StandardScaler
+from glob import glob
+import re
 
 from loguru import logger
 import argparse
@@ -54,21 +56,57 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     y = classes[train_indices], classes[val_indices]
 
-    # Instantiate Solution object
-    list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
-                                                                      config_es["n_hidden_layers"],
-                                                                      config_es["hidden_layer_size"],
-                                                                      args.batch_norm,
-                                                                      args.activation,
-                                                                      config_es["init_mode"])) for n_features in
-                            num_features_per_network]
+    # Instantiate Solution object or load pre-existing list[NeuralNetwork]
+
+    dataset_folder = "real_world_data"
+    if args.dataset in ["circles", "spheres", "alternate_stripes"]:
+        dataset_folder = "synthetic_data"
+
+    # Construct the directory path (excluding the epoch part)
+    directory_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                      f"activation={args.activation}/"
+                      f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}/")
+
+    # Search for files matching the pattern
+    file_pattern = os.path.join(directory_path, "best_individual_epoch_*.p")
+    files = glob(file_pattern)
+
+    if files:
+        # Extract epochs from filenames
+        epoch_files = []
+        for file in files:
+            match = re.search(r"best_individual_epoch_(\d+)\.p", file)
+            if match:
+                epoch_files.append((int(match.group(1)), file))  # Store (epoch, file_path)
+
+        if epoch_files:
+            # Find the file with the highest epoch
+            epoch_files.sort(reverse=True)  # Sort descending by epoch
+            latest_epoch, latest_file = epoch_files[0]
+
+            print(f"Latest saved epoch found: {latest_epoch}")
+
+            # Compare the extracted epoch with the threshold
+            if latest_epoch < config_es["epochs"]-1:
+                # Load the object using pickle
+                with open(latest_file, "rb") as f:
+                    list_neural_networks = pickle.load(f)
+
+                print(f"Loaded object from epoch {latest_epoch}")
+
+    else:
+        list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
+                                                                          config_es["n_hidden_layers"],
+                                                                          config_es["hidden_layer_size"],
+                                                                          args.batch_norm,
+                                                                          args.activation,
+                                                                          config_es["init_mode"])) for n_features in
+                                num_features_per_network]
 
     solution = Solution(list_neural_networks)
 
     logger.info(f"Run number {run_index} training baseline for dataset={args.dataset}, "
                 f"partial_contrib={args.partial_contrib}, "
-                f"init_mode={config_es['init_mode']}, "
-                f"batch_norm={args.batch_norm}, "
                 f"activation_function={args.activation}")
 
     results_list = solution.fit(train_x,
@@ -78,7 +116,6 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                                 config_es["learning_rate"],
                                 config_es["pop_size"],
                                 args.partial_contrib,
-                                config_es["full_then_partial_objective"],
                                 config_es["num_components"],
                                 config_es["epochs"],
                                 config_es["batch_size"],
@@ -86,17 +123,13 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                                 train_indices,
                                 val_indices,
                                 run_index,
+                                latest_epoch,
                                 config_es["plot"]
                                 )
 
-    dataset_folder = "real_world_data"
-    if args.dataset in ["circles", "spheres", "alternate_stripes"]:
-        dataset_folder = "synthetic_data"
-
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
-                   f"activation={args.activation}/{config_es['init_mode']}/"
-                   f"batch_norm={args.batch_norm}/"
-                   f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}.p")
+                   f"activation={args.activation}/"
+                   f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}/results_list.p")
 
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))
