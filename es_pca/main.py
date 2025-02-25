@@ -71,6 +71,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     file_pattern = os.path.join(directory_path, "best_individual_epoch_*.p")
     files = glob(file_pattern)
 
+    latest_epoch = 0
     if files:
         # Extract epochs from filenames
         epoch_files = []
