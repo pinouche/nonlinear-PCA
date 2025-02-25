@@ -102,6 +102,7 @@ class MonotonicForwardLayer(Layer):
 class BatchNormLayer(Layer):
 
     def __init__(self, dims: int) -> None:
+
         self.gamma = np.ones((1, dims), dtype="float32")
         self.bias = np.zeros((1, dims), dtype="float32")
 
@@ -141,12 +142,13 @@ class BatchNormLayer(Layer):
             self.mean_x = np.mean(x, axis=0, keepdims=True)
             self.var_x = np.mean((x - self.mean_x) ** 2, axis=0, keepdims=True)
             self.update_running_variables()
-        else:
-            self.mean_x = self.running_mean_x.copy()
-            self.var_x = self.running_var_x.copy()
 
-        self.var_x += self.epsilon
-        self.stddev_x = np.sqrt(self.var_x)
+            self.var_x += self.epsilon
+            self.stddev_x = np.sqrt(self.var_x)
+        else:
+            self.mean_x = self.running_mean_x
+            self.var_x = self.running_var_x
+
         self.x_minus_mean = x - self.mean_x
         self.standard_x = self.x_minus_mean / self.stddev_x
 

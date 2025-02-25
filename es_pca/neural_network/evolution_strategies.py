@@ -1,12 +1,16 @@
 import numpy as np
 import copy
+import os
+import pickle
 from typing import List, Any
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 from es_pca.metrics.objective_function import compute_fitness
 from es_pca.neural_network.neural_network import NeuralNetwork
-from es_pca.utils import convert_dic_to_list, create_scatter_plot
+from es_pca.utils import convert_dic_to_list, create_scatter_plot, parse_arguments
+
+args = parse_arguments()
 
 
 class Solution:
@@ -16,7 +20,7 @@ class Solution:
         self.networks = network_list
 
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int,
-               partial_contribution_objective: bool, num_components: int, run_index: int) -> None:
+               partial_contribution_objective: bool, num_components: int, run_index: int, epoch: int) -> None:
 
         dict_weighted_noise = {}
 
@@ -69,6 +73,32 @@ class Solution:
         self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
                          for i in range(len(self.networks))]
 
+        # save the neural network every 200 epochs
+        epoch_period = 200
+        if (epoch + 1) % epoch_period == 0:
+            dataset_folder = "real_world_data"
+            if args.dataset in ["circles", "spheres", "alternate_stripes"]:
+                dataset_folder = "synthetic_data"
+
+            saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                           f"activation={args.activation}/"
+                           f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/best_individual_epoch_{epoch}.p")
+
+            # Ensure the directory exists
+            os.makedirs(os.path.dirname(saving_path), exist_ok=True)
+
+            # Remove the existing file if it exists
+            path_remove = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                           f"activation={args.activation}/"
+                           f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/best_individual_epoch_{epoch-epoch_period}.p")
+
+            if os.path.exists(path_remove):
+                os.remove(path_remove)
+
+            # Save your object (replace `your_object` with the actual object you want to save)
+            with open(saving_path, "wb") as f:
+                pickle.dump(self.networks, f)
+
     def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float,
             learning_rate: float, pop_size: int,
             partial_contribution_objective: bool,
@@ -79,36 +109,32 @@ class Solution:
             train_indices: np.array,
             val_indices: np.array,
             run_index: int,
-            verbose: bool = False) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
+            latest_epoch: int = 0,
+            verbose: bool = False,) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
 
         result_list = []
         num_examples = x_train.shape[0]
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
 
-        best_objective_val = 0
-        early_stopping_iterations = 0
-        # x_transformed_train, x_transformed_val = None, None
-        # pca_transformed_val, pca_transformed_train = None, None
-
-        for epoch in range(epochs):
+        for epoch in range(latest_epoch, epochs):
             print(f"COMPUTING FOR EPOCH {epoch}")
             np.random.shuffle(random_index)
             x_train_shuffled = copy.deepcopy(x_train[random_index])
 
             for index_batch in range(0, num_examples, batch_size):
                 mini_batch_x = x_train_shuffled[index_batch: index_batch + batch_size]
-                if mini_batch_x.shape[
-                    0] == batch_size:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
+                if mini_batch_x.shape[0] > x_train.shape[1]:  # n_components must be between 0 and min(n_samples, n_features) + small batches are too noisy.
                     self.update(mini_batch_x,
                                 sigma,
                                 learning_rate,
                                 pop_size,
                                 partial_contribution_objective,
                                 num_components,
-                                run_index)
+                                run_index,
+                                epoch)
 
             # evaluate objective at the end of the epoch on the training set.
-            x_transformed_train = self.predict(x_train, train=True)
+            x_transformed_train = self.predict(x_train)
             objective_train, pca_transformed_train, pca_model, scaler = self.evaluate_model(x_transformed_train,
                                                                                             partial_contribution_objective,
                                                                                             num_components,
@@ -117,7 +143,7 @@ class Solution:
                                                                                             run_index)
 
             # evaluate objective at the end of the epoch on the validation set
-            x_transformed_val = self.predict(x_val, train=False)
+            x_transformed_val = self.predict(x_val)
             objective_val, pca_transformed_val, pca_model, scaler = self.evaluate_model(
                 x_transformed_val,
                 partial_contribution_objective,
@@ -140,15 +166,6 @@ class Solution:
                                 (objective_train, objective_val)])
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
-            # implement early stopping
-            if objective_val > best_objective_val:
-                best_objective_val = objective_val
-                early_stopping_iterations = 0
-            else:
-                early_stopping_iterations += 1
-                if early_stopping_iterations >= early_stopping:
-                    break
-
             if verbose and epoch % 1 == 0:
                 self.plot((x_transformed_train, x_transformed_val),
                           (pca_transformed_train, pca_transformed_val),
@@ -169,7 +186,7 @@ class Solution:
             # here, we get the dimension of the inputs to know which variables of the dataset it corresponds to.
             input_dim = network.layers[0].weights.shape[0]  # we can ignore this "unresolved attribute"
 
-            perturbed_network = network
+            perturbed_network = copy.deepcopy(network)
             if list_noise:
                 perturbed_layers = network.perturb(list_noise[i], sigma)
                 perturbed_network = NeuralNetwork(perturbed_layers)
