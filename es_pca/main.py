@@ -25,6 +25,13 @@ warnings.filterwarnings("ignore")
 
 def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
 
+    if args.partial_contrib == "false":
+        args.partial_contrib = False
+    elif args.partial_contrib == "true":
+        args.partial_contrib = True
+    else:
+        raise ValueError(f"{args.partial_contrib} not a boolean.")
+
     x = load_data(args.dataset)
     x = x.dropna()
 
@@ -87,19 +94,15 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
             print(f"Latest saved epoch found: {latest_epoch}")
 
-            # Compare the extracted epoch with the threshold
-            if latest_epoch < config_es["epochs"]-1:
-                # Load the object using pickle
-                with open(latest_file, "rb") as f:
-                    list_neural_networks = pickle.load(f)
+            with open(latest_file, "rb") as f:
+                list_neural_networks = pickle.load(f)
 
-                print(f"Loaded object from epoch {latest_epoch}")
+            print(f"Loaded object from epoch {latest_epoch}")
 
     else:
         list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
                                                                           config_es["n_hidden_layers"],
                                                                           config_es["hidden_layer_size"],
-                                                                          args.batch_norm,
                                                                           args.activation,
                                                                           config_es["init_mode"])) for n_features in
                                 num_features_per_network]

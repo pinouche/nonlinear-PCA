@@ -171,13 +171,6 @@ def parse_arguments():
     )
 
     parser.add_argument(
-        "--batch_norm",
-        type=str,
-        default=config["batch_norm"],
-        help="Specify whether or not to use batch_norm."
-    )
-
-    parser.add_argument(
         "--activation",
         type=str,
         default=config["activation"],

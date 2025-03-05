@@ -1,6 +1,6 @@
 hidden_layer_size: 64
 activation: "relu"
-batch_norm: "true"
+batch_norm: true
 init_mode: "normal"
 n_hidden_layers: 1
 pop_size: 200
