@@ -24,7 +24,6 @@ warnings.filterwarnings("ignore")
 
 
 def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
-
     if args.partial_contrib == "false":
         args.partial_contrib = False
     elif args.partial_contrib == "true":
@@ -79,23 +78,27 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     files = glob(file_pattern)
 
     latest_epoch = 0
+    previous_results = []
     if files:
-        # Extract epochs from filenames
-        epoch_files = []
+        file = None
         for file in files:
             match = re.search(r"best_individual_epoch_(\d+)\.p", file)
             if match:
-                epoch_files.append((int(match.group(1)), file))  # Store (epoch, file_path)
+                latest_epoch = int(match.group(1))
+                break  # Since we know there's only one match, we can exit the loop
 
-        if epoch_files:
-            # Find the file with the highest epoch
-            epoch_files.sort(reverse=True)  # Sort descending by epoch
-            latest_epoch, latest_file = epoch_files[0]
-
+        if file:
             print(f"Latest saved epoch found: {latest_epoch}")
-
-            with open(latest_file, "rb") as f:
+            with open(file, "rb") as f:
                 list_neural_networks = pickle.load(f)
+
+            # Load previous results if they exist
+            results_file_path = os.path.join(directory_path, "results_list.p")
+
+            if os.path.exists(results_file_path):
+                with open(results_file_path, "rb") as f:
+                    previous_results = pickle.load(f)
+                print(f"Loaded previous results up to epoch {latest_epoch}")
 
             print(f"Loaded object from epoch {latest_epoch}")
 
@@ -113,23 +116,28 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                 f"partial_contrib={args.partial_contrib}, "
                 f"activation_function={args.activation}")
 
-    results_list = solution.fit(train_x,
-                                val_x,
-                                y,
-                                config_es["sigma"],
-                                config_es["learning_rate"],
-                                config_es["pop_size"],
-                                args.partial_contrib,
-                                config_es["num_components"],
-                                config_es["epochs"],
-                                config_es["batch_size"],
-                                config_es["early_stopping_epochs"],
-                                train_indices,
-                                val_indices,
-                                run_index,
-                                latest_epoch,
-                                config_es["plot"]
-                                )
+    results = solution.fit(train_x,
+                           val_x,
+                           y,
+                           config_es["sigma"],
+                           config_es["learning_rate"],
+                           config_es["pop_size"],
+                           args.partial_contrib,
+                           config_es["num_components"],
+                           config_es["epochs"],
+                           config_es["batch_size"],
+                           config_es["early_stopping_epochs"],
+                           train_indices,
+                           val_indices,
+                           run_index,
+                           latest_epoch,
+                           config_es["plot"]
+                           )
+
+    if previous_results:
+        results_list = previous_results + results
+    else:
+        results_list = results
 
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
                    f"activation={args.activation}/"
