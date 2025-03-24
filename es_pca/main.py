@@ -98,9 +98,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
             if os.path.exists(results_file_path):
                 with open(results_file_path, "rb") as f:
                     previous_results = pickle.load(f)
-                print(f"Loaded previous results up to epoch {latest_epoch}")
-
-            print(f"Loaded object from epoch {latest_epoch}")
+                print(f"Loaded previous results up to epoch {latest_epoch}, length {len(previous_results)}")
 
     else:
         list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,

@@ -166,6 +166,25 @@ class Solution:
                                 (objective_train, objective_val)])
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
+            # save the neural network every 200 epochs
+            epoch_period = 200
+            if (epoch + 1) % epoch_period == 0:
+                dataset_folder = "real_world_data"
+                if args.dataset in ["circles", "spheres", "alternate_stripes"]:
+                    dataset_folder = "synthetic_data"
+
+                saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                               f"activation={args.activation}/"
+                               f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/"
+                               f"results_list.p")
+
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(saving_path), exist_ok=True)
+
+                # Save your object (replace `your_object` with the actual object you want to save)
+                with open(saving_path, "wb") as f:
+                    pickle.dump(result_list, f)
+
             if verbose and epoch % 1 == 0:
                 self.plot((x_transformed_train, x_transformed_val),
                           (pca_transformed_train, pca_transformed_val),
