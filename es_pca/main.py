@@ -81,9 +81,10 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     previous_results = []
     if files:
         file = None
-        for file in files:
-            match = re.search(r"best_individual_epoch_(\d+)\.p", file)
+        for doc in files:
+            match = re.search(r"best_individual_epoch_(\d+)\.p", doc)
             if match:
+                file = doc
                 latest_epoch = int(match.group(1))
                 break  # Since we know there's only one match, we can exit the loop
 
@@ -91,6 +92,9 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
             print(f"Latest saved epoch found: {latest_epoch}")
             with open(file, "rb") as f:
                 list_neural_networks = pickle.load(f)
+            # Delete the file after loading
+            os.remove(file)
+            print(f"File {file} has been deleted")
 
             # Load previous results if they exist
             results_file_path = os.path.join(directory_path, "results_list.p")

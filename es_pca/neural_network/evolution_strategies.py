@@ -74,7 +74,7 @@ class Solution:
                          for i in range(len(self.networks))]
 
         # save the neural network every 200 epochs
-        epoch_period = 200
+        epoch_period = 100
         if (epoch + 1) % epoch_period == 0:
             dataset_folder = "real_world_data"
             if args.dataset in ["circles", "spheres", "alternate_stripes"]:
@@ -167,7 +167,7 @@ class Solution:
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
             # save the neural network every 200 epochs
-            epoch_period = 200
+            epoch_period = 100
             if (epoch + 1) % epoch_period == 0:
                 dataset_folder = "real_world_data"
                 if args.dataset in ["circles", "spheres", "alternate_stripes"]:
