@@ -88,6 +88,9 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                 latest_epoch = int(match.group(1))
                 break  # Since we know there's only one match, we can exit the loop
 
+        if latest_epoch > config_es["epochs"]:
+            raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es['epochs']}")
+
         if file:
             print(f"Latest saved epoch found: {latest_epoch}")
             with open(file, "rb") as f:
