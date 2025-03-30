@@ -17,12 +17,6 @@ or, alternatively, one can run the provided bash file:
 
 The ```config_es.yaml``` contains all the parameters to fully specify a ES run (ES parameters, neural networks parameters).
 
-# Run the collating of the results (plotting)
-
-
-```
-python3 es_pca/read_results.py --dataset <dataset>
-```
 
 # Formatting of the datasets
 
