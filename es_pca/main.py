@@ -115,33 +115,24 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                 f"partial_contrib={args.partial_contrib}, "
                 f"activation_function={args.activation}")
 
-    results = solution.fit(train_x,
-                           val_x,
-                           y,
-                           config_es["sigma"],
-                           config_es["learning_rate"],
-                           config_es["pop_size"],
-                           args.partial_contrib,
-                           config_es["num_components"],
-                           config_es["epochs"],
-                           config_es["batch_size"],
-                           config_es["early_stopping_epochs"],
-                           train_indices,
-                           val_indices,
-                           run_index,
-                           latest_epoch,
-                           previous_results,
-                           config_es["plot"]
-                           )
-
-    saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
-                   f"activation={args.activation}/"
-                   f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}/results_list.p")
-
-    if not os.path.exists(os.path.dirname(saving_path)):
-        os.makedirs(os.path.dirname(saving_path))
-
-    pickle.dump(results, open(saving_path, "wb"))
+    solution.fit(train_x,
+                 val_x,
+                 y,
+                 config_es["sigma"],
+                 config_es["learning_rate"],
+                 config_es["pop_size"],
+                 args.partial_contrib,
+                 config_es["num_components"],
+                 config_es["epochs"],
+                 config_es["batch_size"],
+                 config_es["early_stopping_epochs"],
+                 train_indices,
+                 val_indices,
+                 run_index,
+                 latest_epoch,
+                 previous_results,
+                 config_es["plot"]
+                )
 
 
 def run_single_iteration(args: argparse.Namespace):
