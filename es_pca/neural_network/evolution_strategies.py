@@ -74,7 +74,7 @@ class Solution:
                          for i in range(len(self.networks))]
 
         # save the neural network every 200 epochs
-        epoch_period = 100
+        epoch_period = 2
         if (epoch + 1) % epoch_period == 0:
             dataset_folder = "real_world_data"
             if args.dataset in ["circles", "spheres", "alternate_stripes"]:
@@ -110,9 +110,12 @@ class Solution:
             val_indices: np.array,
             run_index: int,
             latest_epoch: int = 0,
-            verbose: bool = False,) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
+            result_list: list = None,
+            verbose: bool = False) -> list[list[tuple[PCA, StandardScaler, Any, Any]]]:
 
-        result_list = []
+        if result_list is None:
+            result_list = []
+
         num_examples = x_train.shape[0]
         random_index = np.linspace(0, num_examples - 1, num_examples).astype(int)
 
@@ -167,7 +170,7 @@ class Solution:
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
             # save the neural network every 200 epochs
-            epoch_period = 100
+            epoch_period = 2
             if (epoch + 1) % epoch_period == 0:
                 dataset_folder = "real_world_data"
                 if args.dataset in ["circles", "spheres", "alternate_stripes"]:

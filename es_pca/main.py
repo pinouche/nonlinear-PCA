@@ -75,37 +75,31 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     # Search for file matching the pattern
     file_pattern = os.path.join(directory_path, "best_individual_epoch_*.p")
-    files = glob(file_pattern)
+    file = glob(file_pattern)[0] if glob(file_pattern) else None
 
     latest_epoch = 0
     previous_results = []
-    if files:
-        file = None
-        for doc in files:
-            match = re.search(r"best_individual_epoch_(\d+)\.p", doc)
-            if match:
-                file = doc
-                latest_epoch = int(match.group(1))
-                break  # Since we know there's only one match, we can exit the loop
+    if file:
 
         if latest_epoch > config_es["epochs"]:
             raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es['epochs']}")
 
-        if file:
-            print(f"Latest saved epoch found: {latest_epoch}")
-            with open(file, "rb") as f:
-                list_neural_networks = pickle.load(f)
-            # Delete the file after loading
-            os.remove(file)
-            print(f"File {file} has been deleted")
+        print(f"Latest saved epoch found: {latest_epoch}")
+        with open(file, "rb") as f:
+            list_neural_networks = pickle.load(f)
+        # Delete the file after loading
+        os.remove(file)
+        print(f"File {file} has been deleted")
 
-            # Load previous results if they exist
-            results_file_path = os.path.join(directory_path, "results_list.p")
+        # Load previous results if they exist
+        results_file_path = os.path.join(directory_path, "results_list.p")
 
-            if os.path.exists(results_file_path):
-                with open(results_file_path, "rb") as f:
-                    previous_results = pickle.load(f)
-                print(f"Loaded previous results up to epoch {latest_epoch}, length {len(previous_results)}")
+        if os.path.exists(results_file_path):
+            with open(results_file_path, "rb") as f:
+                previous_results = pickle.load(f)
+                print(f"Loaded previous results up to epoch {latest_epoch}, "
+                      f"length {len(previous_results)},"
+                      f"type {type(previous_results)}")
 
     else:
         list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
@@ -136,13 +130,9 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                            val_indices,
                            run_index,
                            latest_epoch,
+                           previous_results,
                            config_es["plot"]
                            )
-
-    if previous_results:
-        results_list = previous_results + results
-    else:
-        results_list = results
 
     saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
                    f"activation={args.activation}/"
@@ -151,7 +141,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     if not os.path.exists(os.path.dirname(saving_path)):
         os.makedirs(os.path.dirname(saving_path))
 
-    pickle.dump(results_list, open(saving_path, "wb"))
+    pickle.dump(results, open(saving_path, "wb"))
 
 
 def run_single_iteration(args: argparse.Namespace):
