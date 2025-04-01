@@ -73,7 +73,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
                       f"activation={args.activation}/"
                       f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}/")
 
-    # Search for files matching the pattern
+    # Search for file matching the pattern
     file_pattern = os.path.join(directory_path, "best_individual_epoch_*.p")
     files = glob(file_pattern)
 
