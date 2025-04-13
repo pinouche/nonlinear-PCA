@@ -81,7 +81,11 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     previous_results = []
     if file:
 
-        if latest_epoch > config_es["epochs"]:
+        match = re.search(r'best_individual_epoch_(\d+)\.p', file)
+        if match:
+            latest_epoch = int(match.group(1))
+
+        if latest_epoch+1 >= config_es["epochs"]:
             raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es['epochs']}")
 
         print(f"Latest saved epoch found: {latest_epoch}")
