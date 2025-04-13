@@ -85,7 +85,7 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
         if match:
             latest_epoch = int(match.group(1))
 
-        if latest_epoch > config_es["epochs"]:
+        if latest_epoch+1 >= config_es["epochs"]:
             raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es['epochs']}")
 
         print(f"Latest saved epoch found: {latest_epoch}")
