@@ -22,12 +22,3 @@ The ```config_es.yaml``` contains all the parameters to fully specify a ES run (
 
 The column types of the dataset must be defined in the datasets_config.yaml file. Each categorical variable will then be
 automatically converted to one-hot and use the appropriate transformations.
-
-
-# Run read_results.py
-
-To run this file and get the results of the ES run, one can run:
-
-```
-python es_pca/read_results.py --dataset alternate_stripes --partial_contrib true'
-```

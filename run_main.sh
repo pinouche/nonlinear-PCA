@@ -1,7 +1,7 @@
 # Define the arrays for datasets, partial_contribution_objective values, activation values, and batch normalization values
-datasets=("ionosphere")
-partial_contrib_values=("false" "true")
-activation_values=("relu")
+datasets=("alternate_stripes")
+partial_contrib_values=("true" "false")
+activation_values=("cos")
 
 # Loop over each combination of dataset, partial_contrib, activation, and batch_norm
 for dataset in "${datasets[@]}"; do
