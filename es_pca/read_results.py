@@ -3,57 +3,60 @@ import pickle
 import re
 from typing import List, Any, Dict, Optional
 import argparse
-from loguru import logger
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from numpy import ndarray
 
 # Make sure the script can find the utils module
-from es_pca.utils import load_data, preprocess_data, transform_data_onehot, config_load, dataset_config_load, parse_arguments
+from es_pca.utils import config_load
 from es_pca.neural_network.evolution_strategies import Solution
 
 # Load configurations
 config_evo = config_load()
 
 
-def prepare_data(dataset: str, train_idx: np.array, val_idx: np.array):
+def create_biplot(pca: PCA,
+                  data: ndarray,
+                  original_column_names: list[str] | None = None):
 
-    args = parse_arguments()
-    dataset_config = dataset_config_load("./datasets_config.yaml", args)
+    # Create the plot with improved aesthetics
+    plt.figure(figsize=(10, 8))
 
-    x = load_data(dataset)
-    x = x.dropna()
+    plt.scatter(data[:, 0], data[:, 1],
+                alpha=0.75, edgecolor='black', linewidth=1)
 
-    classes = np.zeros(x.shape[0])
+    # Variable (feature) arrows
+    components = pca.components_[0:2, :]
+    for i, feature in enumerate(original_column_names):
+        # Straight arrows
+        plt.arrow(0, 0, components[0, i], components[1, i],
+                  color='red',
+                  head_width=0.05,
+                  head_length=0.1,
+                  alpha=0.7)
 
-    if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
-        x, classes = preprocess_data(x, args.dataset)
-        classes, mapping = pd.factorize(classes)
+        # Add feature labels with slight offset
+        plt.text(components[0, i] * 1.2,
+                 components[1, i] * 1.2,
+                 feature,
+                 color='darkred',
+                 ha='center',
+                 va='center',
+                 fontweight='bold',
+                 fontsize=12)
 
-    logger.info(f"The column types of the dataset are: {x.dtypes}")
+    # Styling
+    plt.title('PCA Biplot', fontsize=15)
+    plt.xlabel(r"$\widetilde{z}_1$" + f" (variance explained: {pca.explained_variance_ratio_[1] * 100:.2f}%)",
+               fontsize=12)
+    plt.ylabel(r"$\widetilde{z}_2$" + f" (variance explained: {pca.explained_variance_ratio_[1] * 100:.2f}%)",
+               fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.axis('equal')
 
-    # transform categorical columns to one-hot encoded.
-    if dataset_config.categorical_features:
-        x, num_features_per_network = transform_data_onehot(x,
-                                                            dataset_config.categorical_features
-                                                            )
-    else:
-        num_features_per_network = np.array([1] * x.shape[1])
-
-    train_x = x.iloc[train_idx].values
-    val_x = x.iloc[val_idx].values
-
-    if args.dataset not in ["circles", "spheres", "alternate_stripes"]:
-        scl = StandardScaler()
-        scl.fit(train_x)
-        train_x = scl.transform(train_x)
-        val_x = scl.transform(val_x)
-
-    y = classes[train_indices], classes[val_indices]
-
-    return train_x, val_x, y, num_features_per_network
+    # Add discrete legend
+    plt.legend(fontsize=12)
+    plt.show()
 
 
 def find_latest_individual_file(run_path: str) -> Optional[str]:
@@ -145,13 +148,13 @@ def display_run_data(run_data: Dict[str, Any]):
     neural_network_object = run_data["best_individual_data"]
     try:
         model_info, objectives = latest_epoch_data
-        pca_model, scaler, train_indices, val_indices = model_info
+        pca_model, scaler, train_indices, val_indices, pca_transformed_val, pca_transformed_train = model_info
         print("  - Final Epoch Data:")
         print(f"    - NN Object:        {neural_network_object}")
         print(f"    - PCA Model:         {type(pca_model)}")
         print(f"    - Scaler:            {type(scaler)}")
-        print(f"    - Train Indices:     {train_indices.shape}")
-        print(f"    - Validation Indices:{val_indices.shape}")
+        print(f"    - PCA transformed data train: {pca_transformed_train.shape}")
+        print(f"    - PCA transformed data val: {pca_transformed_val.shape}")
         print(f"    - Final Objectives:  Train={objectives[0]:.4f}, Val={objectives[1]:.4f}")
     except (ValueError, TypeError) as e:
         print(f"    - Could not unpack latest epoch data. Error: {e}")
@@ -204,23 +207,10 @@ if __name__ == "__main__":
         neural_network = data_dict["best_individual_data"]
 
         model_info, objectives = epoch_data
-        pca_model, scaler, train_indices, val_indices = model_info
+
+        pca_model, scaler, train_indices, val_indices, pca_transformed_val, pca_transformed_train = model_info
         neural_network_solution = Solution(neural_network)
 
-        train_x, val_x, y, num_features_per_network = prepare_data(args.dataset,
-                                                                   train_indices,
-                                                                   val_indices)
+        original_column_names = labels = [fr"$\Phi_{{{i+1}}}(x_{{{i+1}}})$" for i in range(len(pca_model.explained_variance_ratio_))]
 
-        x_transformed_train = neural_network_solution.predict(train_x)
-        x_transformed_val = neural_network_solution.predict(val_x)
-
-        training_data_transformed = scaler.transform(x_transformed_train)
-        pca_transformed_data = pca_model.transform(training_data_transformed)
-
-        val_data_transformed = scaler.transform(x_transformed_val)
-        pca_transformed_val_data = pca_model.transform(val_data_transformed)
-
-        plt.plot()
-        plt.scatter(pca_transformed_data[:, 0], pca_transformed_data[:, 1], c=y[0], cmap='viridis')
-        plt.scatter(pca_transformed_val_data[:, 0], pca_transformed_val_data[:, 1], c=y[1], cmap='viridis')
-        plt.show()
+        create_biplot(pca_model, pca_transformed_train, original_column_names)
