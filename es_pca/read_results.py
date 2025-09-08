@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from numpy import ndarray
 
-# Make sure the script can find the utils module
 from es_pca.utils import config_load
 from es_pca.neural_network.evolution_strategies import Solution
 

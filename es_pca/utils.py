@@ -1,10 +1,10 @@
 import numpy as np
+from numpy import ndarray
 import pandas as pd
 import argparse
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from sklearn.neighbors import LocalOutlierFactor
-from sklearn.preprocessing import StandardScaler
 from scipy.io import arff
 import os
 import yaml
@@ -38,7 +38,7 @@ def read_arff(path):
     return data
 
 
-def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, np.array]:
+def preprocess_data(data: pd.DataFrame, dataset: str) -> tuple[pd.DataFrame, ndarray]:
     type_class = np.zeros(shape=(1, data.shape[0]))
     if dataset == "abalone":
         type_class = data["sex"]
@@ -69,9 +69,9 @@ def load_data(dataset: str) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def create_scatter_plot(data_transformed: tuple[np.array, np.array],
-                        data_pca_transformed: tuple[np.array, np.array],
-                        classes: tuple[np.array, np.array]) -> None:
+def create_scatter_plot(data_transformed: tuple[ndarray, ndarray],
+                        data_pca_transformed: tuple[ndarray, ndarray],
+                        classes: tuple[ndarray, ndarray]) -> None:
     fig, axes = plt.subplots(2, 1, figsize=(8, 10))  # Create a 2x1 grid of subplots
 
     for i, data in enumerate([data_transformed, data_pca_transformed]):
@@ -96,7 +96,7 @@ def create_scatter_plot(data_transformed: tuple[np.array, np.array],
     plt.show()
 
 
-def get_split_indices(data: np.array, random_seed: int) -> Tuple[np.array, np.array]:
+def get_split_indices(data: ndarray, random_seed: int) -> Tuple[np.array, np.array]:
     config = config_load()
     val_prop = config["val_prop"]
     np.random.seed(random_seed)
@@ -182,7 +182,7 @@ def parse_arguments():
     return args
 
 
-def remove_outliers(data: np.array):
+def remove_outliers(data: ndarray):
     clf = LocalOutlierFactor(n_neighbors=20)
     mask = clf.fit_predict(data)
     mask[mask == -1] = 0
