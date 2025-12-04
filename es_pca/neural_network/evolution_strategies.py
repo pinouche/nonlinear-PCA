@@ -5,6 +5,7 @@ import pickle
 from typing import List, Any
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from numpy import ndarray
 
 from es_pca.metrics.objective_function import compute_fitness
 from es_pca.neural_network.neural_network import NeuralNetwork
@@ -74,7 +75,7 @@ class Solution:
                          for i in range(len(self.networks))]
 
         # save the neural network every 200 epochs
-        epoch_period = 200
+        epoch_period = 10
         if (epoch + 1) % epoch_period == 0:
             dataset_folder = "real_world_data"
             if args.dataset in ["circles", "spheres", "alternate_stripes"]:
@@ -99,15 +100,15 @@ class Solution:
             with open(saving_path, "wb") as f:
                 pickle.dump(self.networks, f)
 
-    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[np.array, np.array], sigma: float,
+    def fit(self, x_train: np.ndarray, x_val: np.ndarray, classes: tuple[ndarray, ndarray], sigma: float,
             learning_rate: float, pop_size: int,
             partial_contribution_objective: bool,
             num_components: int,
             epochs: int,
             batch_size: int,
             early_stopping: int,
-            train_indices: np.array,
-            val_indices: np.array,
+            train_indices: ndarray,
+            val_indices: ndarray,
             run_index: int,
             latest_epoch: int = 0,
             result_list: list = None,
@@ -165,12 +166,12 @@ class Solution:
                 objective_train = objective_train[0]
                 objective_val = objective_val[0]
 
-            result_list.append([(pca_model, scaler, train_indices, val_indices),
+            result_list.append([(pca_model, scaler, train_indices, val_indices, pca_transformed_val, pca_transformed_train),
                                 (objective_train, objective_val)])
             print(f"the objective value for epoch {epoch} is: train {objective_train}, val {objective_val}")
 
             # save the neural network every 200 epochs
-            epoch_period = 200
+            epoch_period = 10
             if (epoch + 1) % epoch_period == 0:
                 dataset_folder = "real_world_data"
                 if args.dataset in ["circles", "spheres", "alternate_stripes"]:
@@ -195,9 +196,9 @@ class Solution:
 
         return result_list
 
-    def plot(self, x_transformed: tuple[np.array, np.array],
-             pca_transformed: tuple[np.array, np.array],
-             classes: tuple[np.array, np.array]) -> None:
+    def plot(self, x_transformed: tuple[ndarray, ndarray],
+             pca_transformed: tuple[ndarray, ndarray],
+             classes: tuple[ndarray, ndarray]) -> None:
         create_scatter_plot(x_transformed, pca_transformed, classes)
 
     def predict(self, x: np.ndarray, sigma: float = None, list_noise: list = None, train: bool = True) -> np.ndarray:
@@ -225,7 +226,7 @@ class Solution:
                        num_components: int,
                        training_mode: bool,
                        save_pca_model: bool,
-                       run_index: int) -> tuple[list[float], np.array, PCA, StandardScaler]:
+                       run_index: int) -> tuple[list[float], ndarray, PCA, StandardScaler]:
 
         score, pca_transformed_data, pca_model, scaler = compute_fitness(run_index,
                                                                          x_transformed,

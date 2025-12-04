@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import ndarray
 import pickle
 import os
 
@@ -12,14 +13,14 @@ from es_pca.utils import config_load, remove_outliers
 CONFIG = config_load()
 
 
-def if_empty_zero(array: np.array) -> np.array:
+def if_empty_zero(array: ndarray) -> ndarray:
     if array.size == 0:
         array = 0
 
     return np.array(array)
 
 
-def compute_variance_contribution(cov: np.array, comp: np.array, k: int, l: int, d: int) -> float:
+def compute_variance_contribution(cov: ndarray, comp: ndarray, k: int, l: int, d: int) -> float:
 
     first_term = comp[k, l] ** 2 * cov[l, l]
 
@@ -32,7 +33,7 @@ def compute_variance_contribution(cov: np.array, comp: np.array, k: int, l: int,
     return contribution
 
 
-def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
+def get_contribs(cov: ndarray, comp: ndarray, p: int) -> ndarray:
     arr_contrib = [[] for _ in range(p)]
 
     for pc_num in range(p):
@@ -43,7 +44,7 @@ def get_contribs(cov: np.array, comp: int, p: int) -> np.array:
     return np.array(arr_contrib)
 
 
-def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model: bool) -> tuple[PCA, np.array]:
+def get_pca(run_index: int, data: ndarray, training_mode: bool, save_pca_model: bool) -> tuple[PCA, ndarray]:
     pca_type = CONFIG["pca_type"]
     pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
@@ -74,7 +75,7 @@ def get_pca(run_index: int, data: np.array, training_mode: bool, save_pca_model:
 
 
 def compute_fitness(run_index: int,
-                    data_transformed: np.array,
+                    data_transformed: ndarray,
                     training_mode: bool = True,
                     partial_contribution_objective: bool = False,
                     k: int = 1,
