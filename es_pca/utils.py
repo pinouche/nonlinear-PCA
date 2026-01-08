@@ -12,7 +12,7 @@ import yaml
 from typing import Tuple
 
 from es_pca.synthetic_datasets import make_two_spheres, make_alternate_stripes, circles_data
-from es_pca.data_models.data_models import ConfigDataset
+from es_pca.data_models.data_models import ConfigDataset, ConfigES
 
 
 def dataset_config_load(file_path: str, args: argparse.Namespace) -> ConfigDataset:
@@ -98,7 +98,7 @@ def create_scatter_plot(data_transformed: tuple[ndarray, ndarray],
 
 def get_split_indices(data: ndarray, random_seed: int) -> Tuple[np.array, np.array]:
     config = config_load()
-    val_prop = config["val_prop"]
+    val_prop = config.val_prop
     np.random.seed(random_seed)
     n = data.shape[0]
     indices = np.arange(n)
@@ -146,11 +146,12 @@ def transform_data_onehot(data: pd.DataFrame, object_indices: list[int]) -> Tupl
     return data, num_cols_per_categories
 
 
-def config_load() -> dict:
+def config_load() -> ConfigES:
     root_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(root_dir, "../config_es.yaml")
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        data = yaml.safe_load(f)
+        return ConfigES(**data)
 
 
 def parse_arguments():
@@ -159,21 +160,21 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="test", conflict_handler="resolve")
     parser.add_argument(
         "--dataset",
-        default=config["dataset"],
+        default=config.dataset,
         help="Specify the dataset.",
     )
 
     parser.add_argument(
         "--partial_contrib",
         type=str,
-        default=config["partial_contribution_objective"],
+        default=str(config.partial_contribution_objective).lower(),
         help="Specify whether or not to use partial contribution objective."
     )
 
     parser.add_argument(
         "--activation",
         type=str,
-        default=config["activation"],
+        default=config.activation,
         help="Specify the activation function to use."
     )
 
