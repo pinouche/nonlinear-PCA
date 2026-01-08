@@ -110,7 +110,7 @@ def load_and_pair_results(
             if os.path.isdir(run_path) and item.isdigit():
                 run_data = {"run_id": int(item), "path": run_path}
 
-                # 1. Load the latest 'best_individual' file
+                # k=1. Load the latest 'best_individual' file
                 latest_individual_file = find_latest_individual_file(run_path)
                 if latest_individual_file:
                     try:
@@ -119,7 +119,7 @@ def load_and_pair_results(
                     except (pickle.UnpicklingError, EOFError) as e:
                         print(f"  Could not read pickle file {latest_individual_file}: {e}")
 
-                # 2. Load the last element from 'results_list.p'
+                # k=2. Load the last element from 'results_list.p'
                 results_file = os.path.join(run_path, "results_list.p")
                 if os.path.exists(results_file):
                     try:
