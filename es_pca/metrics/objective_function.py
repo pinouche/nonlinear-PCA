@@ -45,12 +45,12 @@ def get_contribs(cov: ndarray, comp: ndarray, p: int) -> ndarray:
 
 
 def get_pca(run_index: int, data: ndarray, training_mode: bool, save_pca_model: bool) -> tuple[PCA, ndarray]:
-    pca_type = CONFIG["pca_type"]
+    pca_type = CONFIG.pca_type
     pca_path = f"tmp_files/pca_model_{run_index}.pkl"
 
     # Initialize the PCA model based on the type specified
     if pca_type == "sparse":
-        pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG["alpha_reg_pca"])
+        pca = SparsePCA(n_components=data.shape[1], alpha=CONFIG.alpha_reg_pca)
     elif pca_type == "regular":
         pca = PCA(n_components=data.shape[1])
     else:
@@ -81,7 +81,7 @@ def compute_fitness(run_index: int,
                     k: int = 1,
                     save_pca_model: bool = False) -> Union[list, Any]:
 
-    if CONFIG["remove_outliers"] and training_mode:
+    if CONFIG.remove_outliers and training_mode:
         data_transformed = remove_outliers(data_transformed)
 
     scaler_path = f"tmp_files/scaler_model_{run_index}.pkl"

@@ -17,13 +17,13 @@ from es_pca.neural_network.neural_network import NeuralNetwork
 from es_pca.neural_network.evolution_strategies import Solution
 from es_pca.utils import (get_split_indices, transform_data_onehot, parse_arguments, config_load,
                           dataset_config_load, preprocess_data)
-from es_pca.data_models.data_models import ConfigDataset
+from es_pca.data_models.data_models import ConfigDataset, ConfigES
 from es_pca.layers.init_weights_layers import create_nn_for_numerical_col
 
 warnings.filterwarnings("ignore")
 
 
-def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
+def main(config_es: ConfigES, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
     if args.partial_contrib == "false":
         args.partial_contrib = False
     elif args.partial_contrib == "true":
@@ -85,8 +85,8 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
         if match:
             latest_epoch = int(match.group(1))
 
-        if latest_epoch+1 >= config_es["epochs"]:
-            raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es['epochs']}")
+        if latest_epoch+1 >= config_es.epochs:
+            raise ValueError(f"Latest saved epoch {latest_epoch} is greater than the number of epochs {config_es.epochs}")
 
         print(f"Latest saved epoch found: {latest_epoch}")
         with open(file, "rb") as f:
@@ -107,10 +107,10 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
 
     else:
         list_neural_networks = [NeuralNetwork(create_nn_for_numerical_col(n_features,
-                                                                          config_es["n_hidden_layers"],
-                                                                          config_es["hidden_layer_size"],
+                                                                          config_es.n_hidden_layers,
+                                                                          config_es.hidden_layer_size,
                                                                           args.activation,
-                                                                          config_es["init_mode"])) for n_features in
+                                                                          config_es.init_mode)) for n_features in
                                 num_features_per_network]
 
     solution = Solution(list_neural_networks)
@@ -122,20 +122,20 @@ def main(config_es: dict, dataset_config: ConfigDataset, args: argparse.Namespac
     solution.fit(train_x,
                  val_x,
                  y,
-                 config_es["sigma"],
-                 config_es["learning_rate"],
-                 config_es["pop_size"],
+                 config_es.sigma,
+                 config_es.learning_rate,
+                 config_es.pop_size,
                  args.partial_contrib,
-                 config_es["num_components"],
-                 config_es["epochs"],
-                 config_es["batch_size"],
-                 config_es["early_stopping_epochs"],
+                 config_es.num_components,
+                 config_es.epochs,
+                 config_es.batch_size,
+                 config_es.early_stopping_epochs,
                  train_indices,
                  val_indices,
                  run_index,
                  latest_epoch,
                  previous_results,
-                 config_es["plot"]
+                 config_es.plot
                 )
 
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     config_data = dataset_config_load("./datasets_config.yaml", args)
 
     # Get number of runs
-    number_of_runs = config_evo["number_of_runs"]
+    number_of_runs = config_evo.number_of_runs
 
     # Determine the number of processes (you can adjust this)
     num_processes = min(multiprocessing.cpu_count(), number_of_runs)
