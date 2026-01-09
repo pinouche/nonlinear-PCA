@@ -80,6 +80,7 @@ During training, results are saved under:
 
 ```
 results/datasets/{synthetic_data|real_world_data}/<dataset>/
+  k=<num_components>/
   activation=<activation>/
   partial_contrib=<true|false>/<run_index>/
 ```
@@ -92,10 +93,26 @@ Artifacts can include:
 To analyze or summarize results, you can use:
 
 ```
-./run_read_results.sh
+./run_read_results.sh -d <dataset> -p <true|false> -k <num_components>
 ```
 
-which invokes es_pca/read_results.py with a dataset and partial_contrib flag configured inside the script.
+Examples:
+
+```
+# Read results for ionosphere with partial contribution and k=2
+./run_read_results.sh -d ionosphere -p true -k 2
+
+# Read results for circles without partial contribution and k=3
+./run_read_results.sh --dataset circles --partial_contrib false --num_components 3
+```
+
+This script forwards the selected dataset, partial_contrib, and PCA dimensionality k to es_pca/read_results.py, which filters runs in the corresponding results/datasets/.../k=<num_components>/ folder.
+
+You can also invoke the Python reader directly:
+
+```
+python es_pca/read_results.py --dataset ionosphere --partial_contrib true --num_components 2
+```
 
 
 ## Reproducibility and multiple runs
