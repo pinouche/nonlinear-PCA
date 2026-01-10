@@ -81,7 +81,9 @@ class Solution:
             if args.dataset in ["circles", "spheres", "alternate_stripes"]:
                 dataset_folder = "synthetic_data"
 
+            # Insert PCA dimension subfolder to allow multiple dimensionalities per dataset
             saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                           f"k={num_components}/"
                            f"activation={args.activation}/"
                            f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/best_individual_epoch_{epoch}.p")
 
@@ -90,6 +92,7 @@ class Solution:
 
             # Remove the existing file if it exists
             path_remove = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                           f"k={num_components}/"
                            f"activation={args.activation}/"
                            f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/best_individual_epoch_{epoch-epoch_period}.p")
 
@@ -177,7 +180,9 @@ class Solution:
                 if args.dataset in ["circles", "spheres", "alternate_stripes"]:
                     dataset_folder = "synthetic_data"
 
+                # Insert PCA dimension subfolder to allow multiple dimensionalities per dataset
                 saving_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                               f"k={num_components}/"
                                f"activation={args.activation}/"
                                f"partial_contrib={str(partial_contribution_objective)}/{str(run_index)}/"
                                f"results_list.p")

@@ -12,7 +12,7 @@ early_stopping_epochs: 30000
 alpha_reg_pca: 0.0
 pca_type: "regular"
 partial_contribution_objective: false
-num_components: 1
+num_components: 2
 dataset: "circles"
 number_of_runs: 15
 remove_outliers: false

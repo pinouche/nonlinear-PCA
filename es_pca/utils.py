@@ -125,7 +125,7 @@ def convert_dic_to_list(dictionary: dict) -> list:
 #     for col in columns:
 #         data[col], _ = pd.factorize(data[col])
 #
-#     num_cols_per_categories = [1] * data.shape[1]
+#     num_cols_per_categories = [k=1] * data.shape[k=1]
 #
 #     return data, num_cols_per_categories
 

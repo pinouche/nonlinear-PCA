@@ -69,7 +69,9 @@ def main(config_es: ConfigES, dataset_config: ConfigDataset, args: argparse.Name
         dataset_folder = "synthetic_data"
 
     # Construct the directory path (excluding the epoch part)
+    # Introduce a PCA dimension subfolder under each dataset to allow multiple dimensionalities.
     directory_path = (f"results/datasets/{dataset_folder}/{args.dataset}/"
+                      f"k={config_es.num_components}/"
                       f"activation={args.activation}/"
                       f"partial_contrib={str(args.partial_contrib)}/{str(run_index)}/")
 

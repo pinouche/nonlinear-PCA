@@ -8,15 +8,17 @@ from sklearn.decomposition import PCA
 from numpy import ndarray
 
 from es_pca.utils import config_load
-from es_pca.neural_network.evolution_strategies import Solution
 
 # Load configurations
 config_evo = config_load()
 
 
-def create_biplot(pca: PCA,
-                  data: ndarray,
-                  original_column_names: list[str] | None = None):
+def create_biplot(
+    pca: PCA,
+    data: ndarray,
+    original_column_names: list[str] | None = None,
+    output_file: str | None = None,
+):
 
     # Create the plot with improved aesthetics
     plt.figure(figsize=(10, 8))
@@ -46,7 +48,7 @@ def create_biplot(pca: PCA,
 
     # Styling
     plt.title('PCA Biplot', fontsize=15)
-    plt.xlabel(r"$\widetilde{z}_1$" + f" (variance explained: {pca.explained_variance_ratio_[1] * 100:.2f}%)",
+    plt.xlabel(r"$\widetilde{z}_1$" + f" (variance explained: {pca.explained_variance_ratio_[0] * 100:.2f}%)",
                fontsize=12)
     plt.ylabel(r"$\widetilde{z}_2$" + f" (variance explained: {pca.explained_variance_ratio_[1] * 100:.2f}%)",
                fontsize=12)
@@ -55,7 +57,13 @@ def create_biplot(pca: PCA,
 
     # Add discrete legend
     plt.legend(fontsize=12)
-    plt.show()
+    # Save to file if requested, otherwise display
+    if output_file is not None:
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        plt.savefig(output_file, dpi=200, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
 
 
 def find_latest_individual_file(run_path: str) -> Optional[str]:
@@ -81,7 +89,7 @@ def find_latest_individual_file(run_path: str) -> Optional[str]:
 
 
 def load_and_pair_results(
-    base_folder: str, partial_contrib: str
+    base_folder: str, partial_contrib: str, num_components: int
 ) -> List[Dict[str, Any]]:
     """
     For each run, loads the last epoch from 'results_list.p' and the single
@@ -95,8 +103,11 @@ def load_and_pair_results(
 
     run_parent_dirs = []
     for root, dirs, _ in os.walk(search_path_base):
-        if f"partial_contrib={partial_contrib}" in root and any(
-            d.isdigit() for d in dirs
+        # Filter directories that match both k=<num_components> and partial_contrib=<bool>
+        if (
+            f"k={num_components}" in root
+            and f"partial_contrib={partial_contrib}" in root
+            and any(d.isdigit() for d in dirs)
         ):
             run_parent_dirs.append(root)
 
@@ -110,7 +121,7 @@ def load_and_pair_results(
             if os.path.isdir(run_path) and item.isdigit():
                 run_data = {"run_id": int(item), "path": run_path}
 
-                # 1. Load the latest 'best_individual' file
+                # k=1. Load the latest 'best_individual' file
                 latest_individual_file = find_latest_individual_file(run_path)
                 if latest_individual_file:
                     try:
@@ -119,7 +130,7 @@ def load_and_pair_results(
                     except (pickle.UnpicklingError, EOFError) as e:
                         print(f"  Could not read pickle file {latest_individual_file}: {e}")
 
-                # 2. Load the last element from 'results_list.p'
+                # k=2. Load the last element from 'results_list.p'
                 results_file = os.path.join(run_path, "results_list.p")
                 if os.path.exists(results_file):
                     try:
@@ -176,6 +187,12 @@ if __name__ == "__main__":
         required=True,
         help="Specify whether partial contribution was used ('true' or 'false').",
     )
+    parser.add_argument(
+        "-k", "--num_components", "--num-components", "--k",
+        type=int,
+        required=True,
+        help="Number of PCA components (k) whose results should be read and plotted.",
+    )
     args = parser.parse_args()
 
     synthetic_datasets = ["circles", "spheres", "alternate_stripes"]
@@ -190,7 +207,9 @@ if __name__ == "__main__":
     if not os.path.isdir(base_folder_path):
          raise ValueError(f"The specified dataset folder '{base_folder_path}' does not exist.")
 
-    all_paired_data = load_and_pair_results(base_folder_path, partial_contrib_value)
+    all_paired_data = load_and_pair_results(
+        base_folder_path, partial_contrib_value, args.num_components
+    )
 
     if all_paired_data:
         print(f"\nFound and processed final data for {len(all_paired_data)} runs.")
@@ -200,6 +219,17 @@ if __name__ == "__main__":
     else:
         print("\nNo complete run data could be loaded for the specified configuration.")
 
+    # Prepare output directory for saving scatter PCA plots
+    plots_base_dir = os.path.join(
+        "results",
+        "plots",
+        "scatter_pca",
+        "results",
+        dataset_type_folder,
+        args.dataset,
+        f"k={args.num_components}",
+    )
+
     for data_dict in all_paired_data:
 
         epoch_data = data_dict["latest_epoch_data"]
@@ -208,8 +238,20 @@ if __name__ == "__main__":
         model_info, objectives = epoch_data
 
         pca_model, scaler, train_indices, val_indices, pca_transformed_val, pca_transformed_train = model_info
-        neural_network_solution = Solution(neural_network)
+        # Note: Avoid importing training modules here to prevent unintended CLI parsing
 
-        original_column_names = labels = [fr"$\Phi_{{{i+1}}}(x_{{{i+1}}})$" for i in range(len(pca_model.explained_variance_ratio_))]
+        original_column_names = labels = [
+            fr"$\Phi_{{{i+1}}}(x_{{{i+1}}})$"
+            for i in range(len(pca_model.explained_variance_ratio_))
+        ]
 
-        create_biplot(pca_model, pca_transformed_train, original_column_names)
+        # Build output filename per run to avoid overwrites
+        run_id = data_dict.get("run_id", "unknown")
+        output_file = os.path.join(plots_base_dir, f"run_{run_id}_scatter_pca.png")
+
+        create_biplot(
+            pca_model,
+            pca_transformed_train,
+            original_column_names,
+            output_file=output_file,
+        )
