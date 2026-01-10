@@ -3,10 +3,10 @@ activation: "relu"
 batch_norm: true
 init_mode: "normal"
 n_hidden_layers: 1
-pop_size: 200
+pop_size: 500
 sigma: 0.01
 learning_rate: 0.01
-epochs: 2500
+epochs: 200
 batch_size: 128
 early_stopping_epochs: 30000
 alpha_reg_pca: 0.0
