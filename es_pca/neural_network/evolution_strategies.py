@@ -49,7 +49,6 @@ class Solution:
             ]
 
             for network_i in range(len(self.networks)):
-                obj = f_obj[network_i]
                 network = weighted_noise[network_i]
                 if f"network_id_{network_i}" not in dict_weighted_noise:
                     dict_weighted_noise[f"network_id_{network_i}"] = {}
@@ -58,11 +57,11 @@ class Solution:
                     layer = network[layer_id]
                     if layer_id not in dict_weighted_noise[f"network_id_{network_i}"]:
                         dict_weighted_noise[f"network_id_{network_i}"][layer_id] = []
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[0] * obj)  # for weights
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[1] * obj)  # for biases
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[0])  # for weights
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[1])  # for biases
                     else:
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][0] += layer[0] * obj
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][1] += layer[1] * obj
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][0] += layer[0]
+                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][1] += layer[1]
 
         # divide the values by the population size and multiply by (lr/sigma) to compute the update_step
         for outer_key, inner_dict in dict_weighted_noise.items():

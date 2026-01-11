@@ -33,11 +33,6 @@ class NeuralNetwork:
             if isinstance(layer, ForwardLayer):
                 w_update, b_update = layer_update[0], layer_update[1]
                 w, b = layer.get_layer_weights()
-                # Ensure parameters are float for safe in-place addition
-                if not np.issubdtype(w.dtype, np.floating):
-                    w = w.astype(np.float64, copy=False)
-                if not np.issubdtype(b.dtype, np.floating):
-                    b = b.astype(np.float64, copy=False)
                 w += w_update
                 b += b_update
                 layer.set_weights((w, b))
@@ -63,7 +58,7 @@ class NeuralNetwork:
             w, b = layer.get_layer_weights()
             if isinstance(layer, BatchNormLayer):  # we do not perturb the batch norm parameters.
                 # Use float zeros to avoid dtype casting issues downstream
-                list_weights_noise.append((np.array([0.0], dtype=np.float64), np.array([0.0], dtype=np.float64)))
+                list_weights_noise.append((0.0, 0.0))
             else:
                 list_weights_noise.append((np.random.randn(*w.shape), np.random.randn(*b.shape)))
 
