@@ -165,8 +165,8 @@ class Solution:
                 objective_train = np.sum(objective_train)
                 objective_val = np.sum(objective_val)
             else:
-                objective_train = objective_train[0]
-                objective_val = objective_val[0]
+                objective_train = objective_train[0] * len(objective_train) # rescale the objective value
+                objective_val = objective_val[0] * len(objective_val)
 
             result_list.append([(pca_model, scaler, train_indices, val_indices, pca_transformed_val, pca_transformed_train),
                                 (objective_train, objective_val)])

@@ -160,6 +160,12 @@ if __name__ == "__main__":
     # Load configurations
     config_evo = config_load()
     args = parse_arguments()
+    # Override the number of principal components from CLI if provided
+    try:
+        config_evo.num_components = int(args.num_components)
+    except AttributeError:
+        # Backward compatibility: if older scripts call without this arg
+        pass
     config_data = dataset_config_load("./datasets_config.yaml", args)
 
     # Get number of runs

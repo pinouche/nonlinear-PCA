@@ -118,7 +118,10 @@ def compute_fitness(run_index: int,
         score = np.sum(variance_contrib[:k], axis=0)/total_variance_to_explain
     else:
         # this is the regular PCA total explained variance
-        score = [np.sum(variance_contrib[:k])/total_variance_to_explain]*p
+        # to keep the same order of magnitude as the per-variable scores above,
+        # distribute the total explained variance evenly across variables
+        scale_factor = total_variance_to_explain * p
+        score = [np.sum(variance_contrib[:k])/scale_factor] * p
 
     # numbers cannot be above k=1 as they are standardized by the total amount of variance in the data
     # assert all(num < k=1 for num in score), "Not all numbers are below k=1"
