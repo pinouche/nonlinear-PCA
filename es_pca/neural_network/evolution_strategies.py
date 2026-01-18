@@ -9,7 +9,7 @@ from numpy import ndarray
 
 from es_pca.metrics.objective_function import compute_fitness
 from es_pca.neural_network.neural_network import NeuralNetwork
-from es_pca.utils import convert_dic_to_list, create_scatter_plot, parse_arguments
+from es_pca.utils import create_scatter_plot, parse_arguments
 
 args = parse_arguments()
 
@@ -23,55 +23,50 @@ class Solution:
     def update(self, x_batch: np.ndarray, sigma: float, lr: float, pop_size: int,
                partial_contribution_objective: bool, num_components: int, run_index: int, epoch: int) -> None:
 
-        dict_weighted_noise = {}
+        # Accumulator for weighted noises per network and per layer.
+        # Shape: list[num_networks][num_layers][2] with [weights_sum, bias_sum]
+        accum_weighted_noise = [None] * len(self.networks)
 
-        for p in range(pop_size):
-
-            # get the noise. This generates noise for each of the neural network
+        for _ in range(pop_size):
+            # Generate noise for each network
             list_noise = [net.get_noise_network() for net in self.networks]
             x_transformed = self.predict(x_batch, sigma, list_noise, True)
 
-            f_obj, _, _, _ = self.evaluate_model(x_transformed,
-                                                 partial_contribution_objective,
-                                                 num_components,
-                                                 True,
-                                                 False,
-                                                 run_index)
-            assert len(f_obj) == len(
-                list_noise), f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
+            f_obj, _, _, _ = self.evaluate_model(
+                x_transformed,
+                partial_contribution_objective,
+                num_components,
+                True,
+                False,
+                run_index,
+            )
 
-            weighted_noise = [
-                [
-                    [f_obj[i] * arr for arr in tup]
-                    for tup in inner_list
-                ]
-                for i, inner_list in enumerate(list_noise)
-            ]
+            # Sanity check: one fitness value per network
+            assert len(f_obj) == len(list_noise), (
+                f"not the same length for list_noise {len(list_noise)} and f_obj {len(f_obj)}"
+            )
 
-            for network_i in range(len(self.networks)):
-                network = weighted_noise[network_i]
-                if f"network_id_{network_i}" not in dict_weighted_noise:
-                    dict_weighted_noise[f"network_id_{network_i}"] = {}
+            # Accumulate f_obj[i] * noise for each network and layer
+            for net_i, noise_layers in enumerate(list_noise):
+                if accum_weighted_noise[net_i] is None:
+                    # Initialize with zeros using the shape of the first sampled noise
+                    accum_weighted_noise[net_i] = [
+                        [np.zeros_like(noise_layers[l][0]), np.zeros_like(noise_layers[l][1])]
+                        for l in range(len(noise_layers))
+                    ]
 
-                for layer_id in range(len(network)):
-                    layer = network[layer_id]
-                    if layer_id not in dict_weighted_noise[f"network_id_{network_i}"]:
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id] = []
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[0])  # for weights
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id].append(layer[1])  # for biases
-                    else:
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][0] += layer[0]
-                        dict_weighted_noise[f"network_id_{network_i}"][layer_id][1] += layer[1]
+                coeff = f_obj[net_i]
+                net_accum = accum_weighted_noise[net_i]
+                for l, (eps_w, eps_b) in enumerate(noise_layers):
+                    # eps_* can be arrays (ForwardLayer) or scalars (BatchNormLayer placeholder 0.0)
+                    net_accum[l][0] += coeff * eps_w
+                    net_accum[l][1] += coeff * eps_b
 
-        # divide the values by the population size and multiply by (lr/sigma) to compute the update_step
-        for outer_key, inner_dict in dict_weighted_noise.items():
-            for key, value in inner_dict.items():
-                dict_weighted_noise[outer_key][key][0] = (value[0] / pop_size) * (lr / sigma)
-                dict_weighted_noise[outer_key][key][1] = (value[1] / pop_size) * (lr / sigma)
-
-        # if partial_contribution_objective:
-        self.networks = [self.networks[i].update_weights(convert_dic_to_list(dict_weighted_noise[f"network_id_{i}"]))
-                         for i in range(len(self.networks))]
+        # Scale by (lr/sigma)/pop_size to obtain the update step and apply to each network
+        scale = (lr / sigma) / pop_size
+        for i, net in enumerate(self.networks):
+            updates = [[layer_sum[0] * scale, layer_sum[1] * scale] for layer_sum in accum_weighted_noise[i]]
+            self.networks[i] = net.update_weights(updates)
 
         # save the neural network every 200 epochs
         epoch_period = 10
