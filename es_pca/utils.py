@@ -178,6 +178,13 @@ def parse_arguments():
         help="Specify the activation function to use."
     )
 
+    parser.add_argument(
+        "--num_components",
+        type=int,
+        default=config.num_components,
+        help="Specify the number of principal components (k). Overrides config_es.yaml."
+    )
+
     args = parser.parse_args()
 
     return args

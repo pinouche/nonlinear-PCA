@@ -57,7 +57,8 @@ class NeuralNetwork:
         for layer in self.layers:
             w, b = layer.get_layer_weights()
             if isinstance(layer, BatchNormLayer):  # we do not perturb the batch norm parameters.
-                list_weights_noise.append((np.array([0]), np.array([0])))
+                # Use float zeros to avoid dtype casting issues downstream
+                list_weights_noise.append((0.0, 0.0))
             else:
                 list_weights_noise.append((np.random.randn(*w.shape), np.random.randn(*b.shape)))
 
