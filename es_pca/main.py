@@ -24,6 +24,10 @@ warnings.filterwarnings("ignore")
 
 
 def main(config_es: ConfigES, dataset_config: ConfigDataset, args: argparse.Namespace, run_index: int) -> None:
+    # Ensure each run/process starts with a different RNG state so that
+    # neural network initialization and ES perturbations differ every run.
+    # Using None seeds NumPy with OS entropy.
+    np.random.seed(None)
     if args.partial_contrib == "false":
         args.partial_contrib = False
     elif args.partial_contrib == "true":

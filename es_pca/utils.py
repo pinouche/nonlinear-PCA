@@ -97,12 +97,19 @@ def create_scatter_plot(data_transformed: tuple[ndarray, ndarray],
 
 
 def get_split_indices(data: ndarray, random_seed: int) -> Tuple[np.array, np.array]:
+    """
+    Create train/validation indices using a local RNG seeded with `random_seed`.
+    This avoids modifying NumPy's global RNG state, so model initialization
+    remains unaffected and can vary between runs.
+    """
     config = config_load()
     val_prop = config.val_prop
-    np.random.seed(random_seed)
     n = data.shape[0]
-    indices = np.arange(n)
-    np.random.shuffle(indices)
+
+    # Use a local Generator to avoid changing global RNG state
+    rng = np.random.default_rng(random_seed)
+    indices = rng.permutation(n)
+
     train_indices = indices[int(n * val_prop):]
     val_indices = indices[:int(n * val_prop)]
 
